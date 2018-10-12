@@ -188,6 +188,13 @@ class Metadata:
     def __iter__(self):
         return iter(self._data_container)
 
+    def __repr__(self):
+        return '<{cls} object (schema={schema}, id={id})>'.format(
+            cls = self.__class__.__name__,
+            schema = self.info.version,
+            id = id(self),
+        )
+
 
 class TranslatorWrapper:
     '''
