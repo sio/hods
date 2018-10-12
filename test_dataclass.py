@@ -4,6 +4,8 @@ Unit tests for data classes
 
 from unittest import TestCase
 
+from jsonschema.exceptions import ValidationError
+
 from dataclass import (
     TreeStructuredData as TSD,
     Metadata,
@@ -42,5 +44,10 @@ class testTreeWrapper(TestCase):
 
 
 class testMetadataHolder(TestCase):
-    def test_init(self):
-        meta = Metadata()
+    def setUp(self):
+        self.empty = Metadata()
+
+    def test_empty_object(self):
+        meta = self.empty
+        with self.assertRaises(ValidationError):
+            meta.hello = 1

@@ -129,11 +129,10 @@ class Metadata:
     Validates data against the schema after each change. Calculates hashes of
     data values.
     '''
-    _SCHEMA = 'metadata-v1.json'
     _INITIAL = '''
         {
             "info": {
-                "version": "%s",
+                "version": "metadata-v1.json",
                 "schema": {
                     "data": ""
                 },
@@ -145,7 +144,7 @@ class Metadata:
             },
             "data": {}
         }
-    ''' % _SCHEMA
+    '''
 
     __slots__ = (
         '_data_container',
