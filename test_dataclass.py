@@ -46,8 +46,10 @@ class testTreeWrapper(TestCase):
 class testMetadataHolder(TestCase):
     def setUp(self):
         self.empty = Metadata()
+        self.file = Metadata(json_file='samples/sample-v1-02.json')
 
-    def test_empty_object(self):
-        meta = self.empty
+    def test_validation(self):
         with self.assertRaises(ValidationError):
-            meta.hello = 1
+            self.empty.hello = 1
+        with self.assertRaises(ValidationError):
+            self.file.data.hello = 1

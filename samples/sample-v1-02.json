@@ -1,0 +1,37 @@
+{
+    "info": {
+        "version": "metadata-v1.json",
+        "schema": {
+            "data": "metadata-v1.json"
+        },
+        "hashes": {
+            "data": {
+                "timestamp": "string",
+                "md5": "string",
+                "sha1": "string"
+
+            }
+        }
+    },
+    "data":
+        {
+            "info": {
+                "version": "metadata-v1.json",
+                "schema": {
+                    "data": "string",
+                    "extra": "string"
+                },
+                "hashes": {
+                    "data": {
+                        "timestamp": "string",
+                        "md5": "string",
+                        "sha1": "string"
+
+                    }
+                }
+            },
+            "data": {},
+            "extra": {}
+        },
+    "extra": {}
+}
