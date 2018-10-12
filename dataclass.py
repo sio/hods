@@ -28,7 +28,7 @@ class TreeStructuredData:
         if attr in self._children:
             response = self._children[attr]
         elif attr in self._data:
-            if isinstance(self._data[attr], Mapping):
+            if _ismapping(self._data[attr]):
                 response = self._children[attr] = \
                     type(self)(data=self._data[attr], parent=self)
             else:
@@ -66,3 +66,8 @@ class AlbumMetadata:
     Stable API for music album metadata
     '''
     pass
+
+
+def _ismapping(value):
+    '''Check if argument value is mapping'''
+    return isinstance(value, Mapping)
