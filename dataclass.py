@@ -37,9 +37,12 @@ class TreeStructuredData:
         self._parent = parent
         self._children = dict()
         self._validator = validator
+        self.validate()
 
 
     def validate(self):
+        if self._validator is None:
+            return None
         if self._parent is None:
             return self._validator(self._data)
         else:
