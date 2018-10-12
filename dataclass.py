@@ -15,17 +15,17 @@ class TreeStructuredData:
     nodes via attributes. Child objects refer to the same data tree as the
     parent.
 
-    Handles reading, modification and validation of data structure. Checks
-    hashes all the time.
+    Handles reading, modification and validation of data structure.
     '''
     __slots__ = (
         '_data',
         '_children',
         '_parent',
+        '_validator',
     )
 
 
-    def __init__(self, data, parent=None):
+    def __init__(self, data, parent=None, validator=None):
         if not _ismapping(data):
             raise ValueError(
                 "{cls}() expected a mapping object but received '{data}'".format(
@@ -36,13 +36,14 @@ class TreeStructuredData:
         self._data = data
         self._parent = parent
         self._children = dict()
+        self._validator = validator
 
 
     def validate(self):
         if self._parent is None:
-            print('Validating %s' % self)
+            return self._validator(self._data)
         else:
-            self._parent.validate()
+            return self._parent.validate()
 
 
     def __getattr__(self, attr):
