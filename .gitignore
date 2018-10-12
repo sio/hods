@@ -2,3 +2,7 @@
 dist/
 build/
 *.egg-info/
+
+.venv
+venv
+venv.bat
