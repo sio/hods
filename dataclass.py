@@ -42,12 +42,11 @@ class TreeStructuredData:
 
 
     def validate(self):
-        if self._validator is None:
-            return None
-        if self._parent is None:
-            return self._validator(self._data)
-        else:
-            return self._parent.validate()
+        '''Ensure this data tree and its parent are valid'''
+        if self._validator is not None:
+            self._validator(self._data)
+        if self._parent is not None:
+            self._parent.validate()
 
 
     def datahash(self, algorithm='sha256'):
