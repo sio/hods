@@ -97,7 +97,7 @@ class TreeStructuredData:
 
     def __eq__(self, other):
         if isinstance(other, type(self)):
-            return self._data == other._data
+            return self.datahash_() == other.datahash_()
         else:
             return NotImplemented
 
