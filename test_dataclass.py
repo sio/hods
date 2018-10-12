@@ -35,7 +35,7 @@ class testTreeWrapper(TestCase):
         self.assertEqual(data.tree.second.level, 'of nesting')
         self.assertFalse(hasattr(data.tree, 'nonexistent'))
 
-    def test_newbranches(self):
+    def test_new_branches(self):
         with self.assertRaises(AttributeError):
             self.data.tree = {'new': 'tree'}  # can not replace branches
         self.data.newtree = {'proper': 'new tree'}
