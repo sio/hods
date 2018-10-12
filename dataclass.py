@@ -14,6 +14,13 @@ class TreeStructuredData:
     hashes all the time.
     '''
     def __init__(self, data, parent=None):
+        if not _ismapping(data):
+            raise ValueError(
+                "{cls}() expected a mapping object but received '{data}'".format(
+                    cls = type(self).__name__,
+                    data = type(data).__name__,
+                )
+            )
         self._data = data
         self._parent = parent
         self._children = dict()
