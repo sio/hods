@@ -25,11 +25,13 @@ class TreeStructuredData:
         self._parent = parent
         self._children = dict()
 
+
     def validate(self):
         if self._parent is None:
             print('Validating %s' % self)
         else:
             self._parent.validate()
+
 
     def __getattr__(self, attr):
         if attr in self._children:
@@ -49,13 +51,41 @@ class TreeStructuredData:
             )
         return response
 
+
+    def __setattr__(self, attr, value):
+        reserved = {
+            '_data',
+            '_children',
+            '_parent',
+        }
+
+        node_exists = attr not in reserved and attr in self._data
+        node_is_mapping = node_exists and _ismapping(self._data[attr])
+        value_is_mapping = node_exists and _ismapping(value)
+
+        if attr in reserved \
+        or (hasattr(self, attr) and not node_exists):  # not a data point
+            return super().__setattr__(attr, value)
+
+        if (node_exists and not node_is_mapping and not value_is_mapping) \
+        or not node_exists:
+            self._data[attr] = value  # write leaf/branch value
+        elif node_exists and node_is_mapping and not value_is_mapping:
+            raise AttributeError('can not replace branch node with leaf node: {}'.format(attr))
+        elif node_exists and not node_is_mapping and value_is_mapping:
+            raise AttributeError('can not replace leaf node with branch node: {}'.format(attr))
+        elif node_exists and node_is_mapping and value_is_mapping:
+            raise AttributeError('can not replace existing branch with another: {}'.format(attr))
+        else:
+            raise RuntimeError('this branching should not be possible')
+
+
     def __repr__(self):
         return '<{cls}({data}{parent})>'.format(
             cls = self.__class__.__name__,
             data = self._data,
             parent = ', <child of #%s>' % id(self._parent) if self._parent else ''
         )
-
 
 
 class TranslatorWrapper:
