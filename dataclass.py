@@ -29,7 +29,7 @@ class TreeStructuredData:
 
 
     def __init__(self, data, parent=None, validator=None):
-        if not _ismapping(data):
+        if not is_mapping(data):
             raise ValueError(
                 "{cls}() expected a mapping object but received '{data}'".format(
                     cls = type(self).__name__,
@@ -64,7 +64,7 @@ class TreeStructuredData:
         if attr in self._children:
             response = self._children[attr]
         elif attr in self._data:
-            if _ismapping(self._data[attr]):
+            if is_mapping(self._data[attr]):
                 response = self._children[attr] = \
                     type(self)(data=self._data[attr], parent=self)
             else:
@@ -83,8 +83,8 @@ class TreeStructuredData:
         reserved = set(self.__slots__)
 
         node_exists = attr not in reserved and attr in self._data
-        node_is_mapping = node_exists and _ismapping(self._data[attr])
-        value_is_mapping = node_exists and _ismapping(value)
+        node_is_mapping = node_exists and is_mapping(self._data[attr])
+        value_is_mapping = node_exists and is_mapping(value)
 
         if attr in reserved \
         or (hasattr(self, attr) and not node_exists):  # not a data point
@@ -207,7 +207,7 @@ class AlbumMetadata:
 
 
 
-def _ismapping(value):
+def is_mapping(value):
     '''Check if argument value is mapping'''
     return isinstance(value, Mapping)
 
