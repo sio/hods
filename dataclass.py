@@ -115,6 +115,8 @@ class TreeStructuredData:
         else:
             return NotImplemented
 
+    def __iter__(self):
+        return iter(self._data)
 
 
 class Metadata:
@@ -165,6 +167,9 @@ class Metadata:
             setattr(self._data_container, attr, value)
         else:
             super().__setattr__(attr, value)
+
+    def __iter__(self):
+        return iter(self._data_container)
 
 
 class TranslatorWrapper:
