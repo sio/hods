@@ -3,16 +3,28 @@ Classes for the structured data
 '''
 
 
+import json
 from collections.abc import Mapping
+
+from datahash import datahash
 
 
 class TreeStructuredData:
     '''
-    Generic metadata class.
+    Generic data class. Keeps all data in one tree-like object and exposes its
+    nodes via attributes. Child objects refer to the same data tree as the
+    parent.
 
     Handles reading, modification and validation of data structure. Checks
     hashes all the time.
     '''
+    __slots__ = (
+        '_data',
+        '_children',
+        '_parent',
+    )
+
+
     def __init__(self, data, parent=None):
         if not _ismapping(data):
             raise ValueError(
@@ -53,11 +65,7 @@ class TreeStructuredData:
 
 
     def __setattr__(self, attr, value):
-        reserved = {
-            '_data',
-            '_children',
-            '_parent',
-        }
+        reserved = set(self.__slots__)
 
         node_exists = attr not in reserved and attr in self._data
         node_is_mapping = node_exists and _ismapping(self._data[attr])
@@ -86,6 +94,19 @@ class TreeStructuredData:
             data = self._data,
             parent = ', <child of #%s>' % id(self._parent) if self._parent else ''
         )
+
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            return self._data == other._data
+        else:
+            return NotImplemented
+
+    def datahash_(self, algorithm='sha256'):
+        return datahash(self._data, algorithm)
+
+    @property
+    def json_(self):
+        return json.dumps(self._data, indent=2)
 
 
 class TranslatorWrapper:
