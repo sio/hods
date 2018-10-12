@@ -7,6 +7,8 @@ import json
 import os.path
 from collections.abc import Mapping
 
+import jsonschema
+
 from datahash import datahash
 
 
@@ -131,11 +133,16 @@ class Metadata:
         {
             "info": {
                 "version": "%s",
-                "schema": {},
+                "schema": {
+                    "data": ""
+                },
                 "hashes": {
-                    "data": {}
+                    "data": {
+                        "timestamp": "0000-00-00T00:00:00+00:00"
+                    }
                 }
-            }
+            },
+            "data": {}
         }
     ''' % _SCHEMA
 
@@ -144,14 +151,23 @@ class Metadata:
         '_schema',
     )
 
-    def __init__(self):
-        with open(self._schema_filename) as f:
-            self._schema = json.load(f)
-        self._data_container = TreeStructuredData(json.loads(self._INITIAL))
+    def __init__(self, data=None, json_file=None, yaml_file=None):
+        if data is None:
+            if json_file is not None:
+                with open(json_file) as f:
+                    data = json.load(f)
+            elif yaml_file is not None:
+                raise NotImplementedError  # TODO
+            else:
+                data = json.loads(self._INITIAL)
 
-    @property
-    def _schema_filename(self):
-        return os.path.join('schemas', self._SCHEMA)
+        self._schema = get_schema(data['info']['version'])
+        self._data_container = TreeStructuredData(data, validator=validator(self._schema))
+
+        for key in self.info.schema:
+            branch = getattr(self, key)
+            schema = get_schema(getattr(self.info.schema, key))
+            branch._validator = validator(schema)
 
     def __getattr__(self, attr):
         return getattr(self._data_container, attr)
@@ -194,3 +210,20 @@ class AlbumMetadata:
 def _ismapping(value):
     '''Check if argument value is mapping'''
     return isinstance(value, Mapping)
+
+
+def validator(json_schema):
+    '''Factory for creating validator functions'''
+    def validate(data):
+        if json_schema is not None:
+            return jsonschema.validate(data, json_schema)
+    return validate
+
+
+def get_schema(identificator):
+    '''Get JSON schemas by their ID'''
+    if not identificator:
+        return None
+    schema_filename = os.path.join('schemas', identificator)
+    with open(schema_filename) as f:
+        return json.load(f)
