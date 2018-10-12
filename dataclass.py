@@ -46,6 +46,15 @@ class TreeStructuredData:
             return self._parent.validate()
 
 
+    def datahash(self, algorithm='sha256'):
+        return datahash(self._data, algorithm)
+
+
+    @property
+    def json(self):
+        return json.dumps(self._data, indent=2)
+
+
     def __getattr__(self, attr):
         if attr in self._children:
             response = self._children[attr]
@@ -96,18 +105,24 @@ class TreeStructuredData:
             parent = ', <child of #%s>' % id(self._parent) if self._parent else ''
         )
 
+
     def __eq__(self, other):
         if isinstance(other, type(self)):
             return self.datahash_() == other.datahash_()
         else:
             return NotImplemented
 
-    def datahash_(self, algorithm='sha256'):
-        return datahash(self._data, algorithm)
 
-    @property
-    def json_(self):
-        return json.dumps(self._data, indent=2)
+
+class Metadata:
+    '''
+    Holds structured data with a defined schema.
+
+    Validates data against the schema after each change. Calculates hashes of
+    data values.
+    '''
+    def __init__(self):
+        pass
 
 
 class TranslatorWrapper:
@@ -120,11 +135,13 @@ class TranslatorWrapper:
     pass
 
 
+
 class AlbumMetadata:
     '''
     Stable API for music album metadata
     '''
     pass
+
 
 
 def _ismapping(value):

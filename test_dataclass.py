@@ -36,4 +36,3 @@ class testTreeWrapper(TestCase):
         self.data.newtree = {'proper': 'new tree'}
         self.assertEqual(self.data.newtree.proper, 'new tree')
         self.assertEqual(self.data._data['newtree']['proper'], 'new tree')
-        import pdb; pdb.set_trace()
