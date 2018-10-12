@@ -4,6 +4,7 @@ Classes for the structured data
 
 
 import json
+import os.path
 from collections.abc import Mapping
 
 from datahash import datahash
@@ -124,8 +125,47 @@ class Metadata:
     Validates data against the schema after each change. Calculates hashes of
     data values.
     '''
+    _SCHEMA = 'metadata-v1.json'
+    _INITIAL = '''
+        {
+            "info": {
+                "version": "%s",
+                "schema": {},
+                "hashes": {
+                    "data": {}
+                }
+            }
+        }
+    ''' % _SCHEMA
+
+    __slots__ = (
+        '_data_container',
+        '_schema',
+    )
+
     def __init__(self):
-        pass
+        with open(self._schema_filename) as f:
+            self._schema = json.load(f)
+        self._data_container = TreeStructuredData(json.loads(self._INITIAL))
+
+    @property
+    def _schema_filename(self):
+        return os.path.join('schemas', self._SCHEMA)
+
+    def __getattr__(self, attr):
+        return getattr(self._data_container, attr)
+
+    def __setattr__(self, attr, value):
+        try:
+            self.__getattribute__(attr)
+            use_container = False
+        except AttributeError:
+            use_container = attr not in self.__slots__
+
+        if use_container:
+            setattr(self._data_container, attr, value)
+        else:
+            super().__setattr__(attr, value)
 
 
 class TranslatorWrapper:

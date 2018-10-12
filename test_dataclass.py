@@ -4,7 +4,10 @@ Unit tests for data classes
 
 from unittest import TestCase
 
-from dataclass import TreeStructuredData as TSD
+from dataclass import (
+    TreeStructuredData as TSD,
+    Metadata,
+)
 
 
 class testTreeWrapper(TestCase):
@@ -36,3 +39,8 @@ class testTreeWrapper(TestCase):
         self.data.newtree = {'proper': 'new tree'}
         self.assertEqual(self.data.newtree.proper, 'new tree')
         self.assertEqual(self.data._data['newtree']['proper'], 'new tree')
+
+
+class testMetadataHolder(TestCase):
+    def test_init(self):
+        meta = Metadata()

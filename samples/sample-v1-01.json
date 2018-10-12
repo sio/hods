@@ -1,0 +1,19 @@
+{
+    "info": {
+        "version": "string",
+        "schema": {
+            "data": "string",
+            "extra": "string"
+        },
+        "hashes": {
+            "data": {
+                "timestamp": "string",
+                "md5": "string",
+                "sha1": "string"
+
+            }
+        }
+    },
+    "data": {},
+    "extra": {}
+}
