@@ -93,6 +93,7 @@ class TreeStructuredData:
         if (node_exists and not node_is_mapping and not value_is_mapping) \
         or not node_exists:
             self._data[attr] = value  # write leaf/branch value
+            self.validate()
         elif node_exists and node_is_mapping and not value_is_mapping:
             raise AttributeError('can not replace branch node with leaf node: {}'.format(attr))
         elif node_exists and not node_is_mapping and value_is_mapping:
