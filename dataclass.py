@@ -1,5 +1,5 @@
 '''
-Classes for the structured data
+Classes for accessing and manipulating structured data
 '''
 
 
