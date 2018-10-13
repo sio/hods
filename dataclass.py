@@ -148,7 +148,6 @@ class Metadata:
 
     __slots__ = (
         '_data_container',
-        '_schema',
     )
 
     def __init__(self, data=None, json_file=None, yaml_file=None):
@@ -161,8 +160,8 @@ class Metadata:
             else:
                 data = json.loads(self._INITIAL)
 
-        self._schema = get_schema(data['info']['version'])
-        self._data_container = TreeStructuredData(data, validator=validator(self._schema))
+        schema = get_schema(data['info']['version'])
+        self._data_container = TreeStructuredData(data, validator=validator(schema))
 
         for key in self.info.schema:
             branch = getattr(self, key)
