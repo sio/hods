@@ -218,18 +218,27 @@ def is_mapping(value):
     return isinstance(value, Mapping)
 
 
-def validator(json_schema):
+def validator(schema, engine='jsonschema'):
     '''Factory for creating validator functions'''
     def validate(data):
-        if json_schema is not None:
-            return jsonschema.validate(data, json_schema)
+        if schema is None:
+            return
+        if engine == 'jsonschema':
+            return jsonschema.validate(data, schema)
     return validate
 
 
-def get_schema(identificator):
-    '''Get JSON schemas by their ID'''
+def get_schema(identificator, engine='jsonschema'):
+    '''Get schema object by schema ID (usually URL)'''
+    # TODO:
+    #   - Fetch schema from URL
+    #   - Fetch schema from package contents
+    #   - Detect known URLs and get them from package instead of URL
+    #   - Use package contents for schemas without path
+    #   - Define fallback URL prefix for schemas without path
     if not identificator:
         return None
-    schema_filename = os.path.join('schemas', identificator)
-    with open(schema_filename) as f:
-        return json.load(f)
+    if engine == 'jsonschema':
+        schema_filename = os.path.join('schemas', identificator)
+        with open(schema_filename) as f:
+            return json.load(f)
