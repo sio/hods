@@ -225,6 +225,8 @@ def validator(schema, engine='jsonschema'):
             return
         if engine == 'jsonschema':
             return jsonschema.validate(data, schema)
+        else:
+            raise ValueError('unknown schema engine: {}'.format(engine))
     return validate
 
 
@@ -242,3 +244,5 @@ def get_schema(identificator, engine='jsonschema'):
         schema_filename = os.path.join('schemas', identificator)
         with open(schema_filename) as f:
             return json.load(f)
+    else:
+        raise ValueError('unknown schema engine: {}'.format(engine))
