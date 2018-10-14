@@ -117,6 +117,20 @@ class TreeStructuredData:
     def __iter__(self):
         return iter(self._data)
 
+    def __getitem__(self, key):
+        '''Fallback dictionary API. Use attribute access as the primary API'''
+        return self.__getattr__(key)
+
+    def __setitem__(self, key, value):
+        '''Fallback dictionary API. Use attribute access as the primary API'''
+        if key in self._data \
+        and not is_mapping(self._data[key]) \
+        and not is_mapping(value):
+            self._data[key] = value  # Implements only subset of __setattr__
+            self.validate()
+        else:
+            raise ValueError('can not set value for: {}'.format(key))
+
 
 class Metadata:
     '''
@@ -189,6 +203,14 @@ class Metadata:
             schema = self.info.version,
             id = id(self),
         )
+
+    def __getitem__(self, key):
+        '''Fallback dictionary API. Use attribute access as the primary API'''
+        return self._data_container.__getitem__(key)
+
+    def __setitem__(self, key, value):
+        '''Fallback dictionary API. Use attribute access as the primary API'''
+        return self._data_container.__setitem__(key, value)
 
 
 class TranslatorWrapper:
