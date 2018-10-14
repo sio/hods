@@ -4,20 +4,13 @@ Calculate hashes of structured data regardless of its format
 
 
 import json
-from hashlib import (
-    md5,
-    sha256,
-)
+import hashlib
 
 
 def struct_hash(data, algorithm='sha256'):
     '''
     Calculate hash of structured data that can be serialized into JSON
     '''
-    hashes = {
-        'md5':    lambda byte: md5(byte).hexdigest(),
-        'sha256': lambda byte: sha256(byte).hexdigest(),
-    }
     datastring = json.dumps(
         data,
         indent=None,
@@ -25,7 +18,12 @@ def struct_hash(data, algorithm='sha256'):
         sort_keys=True,  # TODO: does this sorting depend on locale?
     )
     databytes = datastring.encode()
-    return hashes[algorithm](databytes)
+
+    if algorithm in hashlib.algorithms_guaranteed:
+        hasher = getattr(hashlib, algorithm)
+        return hasher(databytes).hexdigest()
+    else:
+        raise ValueError('unsupported hashing algorithm: {}'.format(algorithm))
 
 
 def datahash(container, algorithm='sha256'):
