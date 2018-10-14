@@ -9,7 +9,7 @@ from collections.abc import Mapping
 
 import jsonschema
 
-from datahash import datahash
+from hods._lib.hash import datahash
 
 
 class TreeStructuredData:

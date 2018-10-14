@@ -6,7 +6,7 @@ from unittest import TestCase
 
 import jsonschema.exceptions
 
-from exceptions import ValidationError
+from hods import ValidationError
 
 
 class testValidationError(TestCase):

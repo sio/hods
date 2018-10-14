@@ -4,10 +4,10 @@ Unit tests for data classes
 
 from unittest import TestCase
 
-from exceptions import ValidationError
-from dataclass import (
-    TreeStructuredData as TSD,
+from hods import (
     Metadata,
+    TreeStructuredData as TSD,
+    ValidationError
 )
 
 
