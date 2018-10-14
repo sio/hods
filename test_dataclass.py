@@ -4,8 +4,7 @@ Unit tests for data classes
 
 from unittest import TestCase
 
-from jsonschema.exceptions import ValidationError
-
+from exceptions import ValidationError
 from dataclass import (
     TreeStructuredData as TSD,
     Metadata,

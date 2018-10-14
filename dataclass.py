@@ -44,7 +44,10 @@ class TreeStructuredData:
 
 
     def validate(self):
-        '''Ensure this data tree and its parent are valid'''
+        '''
+        Ensure this data tree and its parent are valid, raise ValidationError
+        otherwise.
+        '''
         if self._validator is not None:
             self._validator(self._data)
         if self._parent is not None:
