@@ -10,6 +10,7 @@ from collections.abc import Mapping
 import jsonschema
 
 from hods._lib.hash import datahash
+from hods import __name__ as _top_level_module
 
 
 class TreeStructuredData:
@@ -26,6 +27,7 @@ class TreeStructuredData:
         '_parent',
         '_validator',
     )
+    __module__ = _top_level_module
 
 
     def __init__(self, data, parent=None, validator=None):
@@ -143,6 +145,7 @@ class Metadata:
     __slots__ = (
         '_data_container',
     )
+    __module__ = _top_level_module
 
     def __init__(self, data=None, json_file=None, yaml_file=None):
         if data is None:
