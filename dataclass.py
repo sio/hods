@@ -54,15 +54,6 @@ class TreeStructuredData:
             self._parent.validate()
 
 
-    def datahash(self, algorithm='sha256'):
-        return datahash(self._data, algorithm)
-
-
-    @property
-    def json(self):
-        return json.dumps(self._data, indent=2)
-
-
     def __getattr__(self, attr):
         if attr in self._children:
             response = self._children[attr]
@@ -117,7 +108,7 @@ class TreeStructuredData:
 
     def __eq__(self, other):
         if isinstance(other, type(self)):
-            return self.datahash() == other.datahash()
+            return datahash(self) == datahash(other)
         else:
             return NotImplemented
 

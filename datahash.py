@@ -10,7 +10,7 @@ from hashlib import (
 )
 
 
-def datahash(data, algorithm='sha256'):
+def struct_hash(data, algorithm='sha256'):
     '''
     Calculate hash of structured data that can be serialized into JSON
     '''
@@ -27,3 +27,9 @@ def datahash(data, algorithm='sha256'):
     databytes = datastring.encode()
     return hashes[algorithm](databytes)
 
+
+def datahash(container, algorithm='sha256'):
+    '''
+    Calculate data hash for HODS container object
+    '''
+    return struct_hash(container._data, algorithm)

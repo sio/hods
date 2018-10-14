@@ -41,6 +41,12 @@ class testTreeWrapper(TestCase):
         self.assertEqual(self.data.newtree.proper, 'new tree')
         self.assertEqual(self.data._data['newtree']['proper'], 'new tree')
 
+    def test_equality(self):
+        other = TSD(self.data._data)
+        self.assertEqual(self.data, other)
+        self.assertNotEqual(self.data._data, other)
+        self.assertNotEqual('hello world', other)
+
 
 class testMetadataHolder(TestCase):
     def setUp(self):
