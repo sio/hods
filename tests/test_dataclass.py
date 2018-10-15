@@ -61,7 +61,7 @@ class testMetadataHolder(TestCase):
 
     def setUp(self):
         self.empty = Metadata()
-        self.file = Metadata(json_file='samples/sample-v1-02.json')
+        self.file = Metadata(filename='samples/sample-v1-02.json')
 
     def test_validation(self):
         with self.assertRaises(ValidationError):

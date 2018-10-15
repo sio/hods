@@ -5,6 +5,8 @@ Classes for accessing and manipulating structured data
 
 import json
 import os.path
+import shutil
+from collections import namedtuple
 from collections.abc import Mapping
 from datetime import datetime, timezone
 
@@ -15,6 +17,11 @@ from hods import (
     __name__ as _top_level_module,
 )
 from hods._lib.hash import datahash
+from hods._lib.files import (
+    detect_format,
+    get_object,
+    write_object,
+)
 
 
 class TreeStructuredData:
@@ -143,17 +150,20 @@ class Metadata:
     '''
     __slots__ = (
         '_data_container',
+        '_file',
     )
     __module__ = _top_level_module
 
 
-    def __init__(self, data=None, json_file=None, yaml_file=None):
+    def __init__(self, data=None, filename=None, fileformat=None):
+        if filename or fileformat:
+            self._file = FileInfo(filename, fileformat)
+        else:
+            self._file = None
+
         if data is None:
-            if json_file is not None:
-                with open(json_file) as f:
-                    data = json.load(f)
-            elif yaml_file is not None:
-                raise NotImplementedError  # TODO
+            if filename is not None:
+                data = get_object(filename, fileformat)
             else:
                 data = json.loads(EMPTY_METADATA_INIT)
 
@@ -164,6 +174,29 @@ class Metadata:
             branch = getattr(self, key)
             schema = get_schema(getattr(self.info.schema, key))
             branch._validator = validator(schema)
+
+
+    def write(self, filename=None, fileformat=None, backup='.hods~'):
+        '''Write changed data structure into the file'''
+        if filename:
+            if not fileformat: fileformat = detect_format(filename)
+        else:
+            filename, fileformat = self._file
+
+        if not filename:
+            raise ValueError('can not write data without filename')
+
+        if backup:  # create backup file with given suffix
+            try:
+                shutil.copyfile(filename, filename + backup)
+                backup_created = True
+            except FileNotFoundError:  # for writing to new files
+                backup_created = False
+
+        write_object(self._data, filename, fileformat)
+
+        if backup and backup_created:  # if no errors occured, remove backup file
+            os.remove(filename + backup)
 
 
     def validate_hashes(self, write_updates=False, sections=(), required=('md5', 'sha256')):
@@ -289,8 +322,7 @@ def get_schema(identificator, engine='jsonschema'):
         return None
     if engine == 'jsonschema':
         schema_filename = os.path.join('schemas', identificator)
-        with open(schema_filename) as f:
-            return json.load(f)
+        return get_object(schema_filename, fileformat='JSON')
     else:
         raise ValueError('unknown schema engine: {}'.format(engine))
 
@@ -298,6 +330,9 @@ def get_schema(identificator, engine='jsonschema'):
 def timestamp():
     offset = datetime.now() - datetime.utcnow()
     return datetime.now(timezone(offset)).replace(microsecond=0).isoformat()
+
+
+FileInfo = namedtuple('FileInfo', 'name,format')
 
 
 EMPTY_METADATA_INIT = '''
