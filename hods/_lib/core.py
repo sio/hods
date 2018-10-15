@@ -6,11 +6,15 @@ Classes for accessing and manipulating structured data
 import json
 import os.path
 from collections.abc import Mapping
+from datetime import datetime, timezone
 
 import jsonschema
 
+from hods import (
+    HashMismatchError,
+    __name__ as _top_level_module,
+)
 from hods._lib.hash import datahash
-from hods import __name__ as _top_level_module
 
 
 class TreeStructuredData:
@@ -160,6 +164,42 @@ class Metadata:
             schema = get_schema(getattr(self.info.schema, key))
             branch._validator = validator(schema)
 
+
+    def validate_hashes(self, write_updates=False, sections=(), required=('md5', 'sha256')):
+        '''Check validity of data hashes and write updated values if neccessary'''
+        if not sections:
+            sections = set(self.info.hashes)
+        for section in sections:
+            try:
+                hashes = self.info.hashes[section]
+            except AttributeError:
+                if write_updates:
+                    self.info.hashes[section] = {'timestamp': timestamp()}
+                hashes = self.info.hashes[section]
+
+            data = self[section]
+            algorithms = set(hashes).union(required)
+
+            for algo in algorithms:
+                if algo == 'timestamp':
+                    continue
+                try:
+                    current = hashes[algo]
+                except AttributeError:
+                    current = None
+                actual = datahash(data, algo)
+
+                if current == actual or (not write_updates and current is None):
+                    continue
+                elif write_updates:
+                    hashes[algo] = actual
+                    hashes.timestamp = timestamp()
+                else:
+                    raise HashMismatchError(
+                        '{algo} hash for {section} is {actual}, not {current}'.format(**locals())
+                    )
+
+
     def __getattr__(self, attr):
         return getattr(self._data_container, attr)
 
@@ -192,6 +232,7 @@ class Metadata:
     def __setitem__(self, key, value):
         '''Fallback dictionary API. Use attribute access as the primary API'''
         return self._data_container.__setitem__(key, value)
+
 
 
 class TranslatorWrapper:
@@ -246,6 +287,11 @@ def get_schema(identificator, engine='jsonschema'):
             return json.load(f)
     else:
         raise ValueError('unknown schema engine: {}'.format(engine))
+
+
+def timestamp():
+    offset = datetime.now() - datetime.utcnow()
+    return datetime.now(timezone(offset)).replace(microsecond=0).isoformat()
 
 
 EMPTY_METADATA_INIT = '''

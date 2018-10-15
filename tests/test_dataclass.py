@@ -5,10 +5,12 @@ Unit tests for data classes
 from unittest import TestCase
 
 from hods import (
+    HashMismatchError,
     Metadata,
     TreeStructuredData as TSD,
-    ValidationError
+    ValidationError,
 )
+from hods._lib.hash import struct_hash
 
 
 class testTreeWrapper(TestCase):
@@ -65,3 +67,25 @@ class testMetadataHolder(TestCase):
             self.empty.hello = 1
         with self.assertRaises(ValidationError):
             self.file.data.hello = 1
+
+    def test_hashes(self):
+        meta = self.empty
+        meta.validate_hashes()  # no-op, test if raises error
+        meta.validate_hashes(write_updates=True)
+        empty_hash = struct_hash({}, 'sha256')
+        self.assertEqual(meta.info.hashes.data.sha256, empty_hash)
+        meta.info.hashes.data.md5 = 'invalidhash'
+        with self.assertRaises(HashMismatchError):
+            meta.validate_hashes()
+
+    def test_hash_for_new_section(self):
+        meta = self.empty
+        meta.validate_hashes(write_updates=True)
+
+        new_section_contents = {'hello': 'world'}
+        meta.new = new_section_contents
+        meta.validate_hashes()  # no-op, check if everything is ok
+        with self.assertRaises(AttributeError):
+            meta.validate_hashes(sections=('new',))
+        meta.validate_hashes(sections=('new',), write_updates=True)
+        self.assertEqual(meta.info.hashes.new.md5, struct_hash(new_section_contents, 'md5'))

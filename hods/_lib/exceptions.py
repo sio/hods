@@ -25,3 +25,8 @@ ThirdPartyValidationErrors = (
 )
 for cls in ThirdPartyValidationErrors:
     ValidationError.register(cls)
+
+
+class HashMismatchError(Exception):
+    '''Raised when data hash does not match the stored value'''
+    __module__ = _top_level_module
