@@ -146,6 +146,7 @@ class Metadata:
     )
     __module__ = _top_level_module
 
+
     def __init__(self, data=None, json_file=None, yaml_file=None):
         if data is None:
             if json_file is not None:
@@ -203,6 +204,7 @@ class Metadata:
     def __getattr__(self, attr):
         return getattr(self._data_container, attr)
 
+
     def __setattr__(self, attr, value):
         try:
             self.__getattribute__(attr)
@@ -215,8 +217,10 @@ class Metadata:
         else:
             super().__setattr__(attr, value)
 
+
     def __iter__(self):
         return iter(self._data_container)
+
 
     def __repr__(self):
         return '<{cls} object (schema={schema}, id={id})>'.format(
@@ -225,9 +229,11 @@ class Metadata:
             id = id(self),
         )
 
+
     def __getitem__(self, key):
         '''Fallback dictionary API. Use attribute access as the primary API'''
         return self._data_container.__getitem__(key)
+
 
     def __setitem__(self, key, value):
         '''Fallback dictionary API. Use attribute access as the primary API'''

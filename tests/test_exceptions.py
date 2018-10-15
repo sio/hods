@@ -10,6 +10,7 @@ from hods import ValidationError
 
 
 class testValidationError(TestCase):
+
     def test_initialization(self):
         err = ValidationError()
 

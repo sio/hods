@@ -58,6 +58,7 @@ class testTreeWrapper(TestCase):
 
 
 class testMetadataHolder(TestCase):
+
     def setUp(self):
         self.empty = Metadata()
         self.file = Metadata(json_file='samples/sample-v1-02.json')
