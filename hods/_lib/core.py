@@ -328,7 +328,10 @@ def get_schema(identificator, engine='jsonschema'):
 
 
 def timestamp():
-    offset = datetime.now() - datetime.utcnow()
+    offset = (
+        datetime.now().replace(microsecond=0)
+        - datetime.utcnow().replace(microsecond=0)
+    )
     return datetime.now(timezone(offset)).replace(microsecond=0).isoformat()
 
 
