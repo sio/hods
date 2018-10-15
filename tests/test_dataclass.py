@@ -47,6 +47,13 @@ class testTreeWrapper(TestCase):
         self.assertNotEqual(self.data._data, other)
         self.assertNotEqual('hello world', other)
 
+    def test_dict_access(self):
+        self.assertEqual(self.data.hello, self.data['hello'])
+        self.data.tree.inner = 'new'
+        self.assertEqual(self.data['tree']['inner'], 'new')
+        self.data['tree']['inner'] = 'new2'
+        self.assertEqual(self.data.tree.inner, 'new2')
+
 
 class testMetadataHolder(TestCase):
     def setUp(self):
