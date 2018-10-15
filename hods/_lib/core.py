@@ -139,23 +139,6 @@ class Metadata:
     Validates data against the schema after each change. Calculates hashes of
     data values.
     '''
-    _INITIAL = '''
-        {
-            "info": {
-                "version": "metadata-v1.json",
-                "schema": {
-                    "data": ""
-                },
-                "hashes": {
-                    "data": {
-                        "timestamp": "0000-00-00T00:00:00+00:00"
-                    }
-                }
-            },
-            "data": {}
-        }
-    '''
-
     __slots__ = (
         '_data_container',
     )
@@ -169,7 +152,7 @@ class Metadata:
             elif yaml_file is not None:
                 raise NotImplementedError  # TODO
             else:
-                data = json.loads(self._INITIAL)
+                data = json.loads(EMPTY_METADATA_INIT)
 
         schema = get_schema(data['info']['version'])
         self._data_container = TreeStructuredData(data, validator=validator(schema))
@@ -265,3 +248,21 @@ def get_schema(identificator, engine='jsonschema'):
             return json.load(f)
     else:
         raise ValueError('unknown schema engine: {}'.format(engine))
+
+
+EMPTY_METADATA_INIT = '''
+    {
+        "info": {
+            "version": "metadata-v1.json",
+            "schema": {
+                "data": ""
+            },
+            "hashes": {
+                "data": {
+                    "timestamp": "0000-00-00T00:00:00+00:00"
+                }
+            }
+        },
+        "data": {}
+    }
+'''
