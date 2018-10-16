@@ -178,6 +178,9 @@ class Metadata:
 
     def write(self, filename=None, fileformat=None, backup='.hods~'):
         '''Write changed data structure into the file'''
+
+        self.validate_hashes()  # TODO: maybe update hashes implicitly?
+
         if filename:
             if not fileformat: fileformat = detect_format(filename)
         else:
