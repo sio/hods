@@ -4,7 +4,7 @@ Human Oriented Data Storage
 
 from hods._lib.exceptions import (
     HashMismatchError,
-    ValidationError,
+    ValidationErrors,
 )
 from hods._lib.core import (
     TreeStructuredData,

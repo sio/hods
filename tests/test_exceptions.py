@@ -6,7 +6,8 @@ from unittest import TestCase
 
 import jsonschema.exceptions
 
-from hods import ValidationError
+from hods import ValidationErrors
+from hods._lib.exceptions import ValidationError
 
 
 class testValidationError(TestCase):
@@ -31,5 +32,5 @@ class testValidationError(TestCase):
     def test_catching_parent_exception(self):
         try:
             raise jsonschema.exceptions.ValidationError('')
-        except ValidationError:
+        except ValidationErrors:
             pass

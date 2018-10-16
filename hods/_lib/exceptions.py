@@ -20,11 +20,17 @@ class ValidationError(Exception, metaclass=ABCMeta):
 
 
 # Support for exceptions provided by third party modules
-ThirdPartyValidationErrors = (
+ThirdPartyValidationErrors = [
     jsonschema.exceptions.ValidationError,
-)
+]
 for cls in ThirdPartyValidationErrors:
     ValidationError.register(cls)
+
+
+# Unfortunately, abstract base classes do not work in `except` clause in Python 3:
+# - https://bugs.python.org/issue12029
+# - https://stackoverflow.com/questions/23890645
+ValidationErrors = tuple(ThirdPartyValidationErrors + [ValidationError])
 
 
 class HashMismatchError(Exception):

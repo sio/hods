@@ -8,7 +8,7 @@ from hods import (
     HashMismatchError,
     Metadata,
     TreeStructuredData as TSD,
-    ValidationError,
+    ValidationErrors,
 )
 from hods._lib.hash import struct_hash
 
@@ -64,14 +64,14 @@ class testMetadataHolder(TestCase):
         self.file = Metadata(filename='tests/data/samples/sample-v1-02.json')
 
     def test_validation(self):
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationErrors):
             self.empty.hello = 1
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationErrors):
             self.file.data.hello = 1
 
     def test_remote_schema(self):
         remote = Metadata(filename='tests/data/samples/sample-v1-03-remote_schema.json')
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationErrors):
             remote.hello = 1
 
     def test_hashes(self):

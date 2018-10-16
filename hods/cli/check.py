@@ -10,7 +10,7 @@ from urllib.error import HTTPError
 
 from hods import (
     Metadata,
-    ValidationError,
+    ValidationErrors,
     HashMismatchError,
 )
 from hods._lib.files import get_files
@@ -37,8 +37,7 @@ def main():
         meta = None
         try:
             meta = Metadata(filename=filename)
-        except ValidationError:
-            # TODO: for some reason this does not catch jsonschema.exceptions.ValidationError
+        except ValidationErrors:
             print('SCHEMA ERROR')
             exit_code = 1
         except FileNotFoundError:
