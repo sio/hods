@@ -23,3 +23,9 @@ class testValidationError(TestCase):
     def test_raising_child_catching_parent(self):
         with self.assertRaises(ValidationError):
             raise jsonschema.exceptions.ValidationError('')
+
+    def test_catching_parent_exception(self):
+        try:
+            raise jsonschema.exceptions.ValidationError('')
+        except ValidationError:
+            pass

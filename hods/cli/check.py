@@ -37,16 +37,17 @@ def main():
         meta = None
         try:
             meta = Metadata(filename=filename)
+        except ValidationError:
+            # TODO: for some reason this does not catch jsonschema.exceptions.ValidationError
+            print('SCHEMA ERROR')
+            exit_code = 1
         except FileNotFoundError:
             print('FILE NOT FOUND')
             exit_code = 1
         except HTTPError:
             print('HTTP ERROR')
             exit_code = 1
-        except ValidationError:
-            print('SCHEMA ERROR')
-            exit_code = 1
-        except:
+        except Exception:
             print('PARSE ERROR')
             exit_code = 1
 
