@@ -4,13 +4,11 @@ Classes for accessing and manipulating structured data
 
 
 import json
-import os.path
+import os
 import shutil
 from collections import namedtuple
 from collections.abc import Mapping
 from datetime import datetime, timezone
-
-import jsonschema
 
 from hods import (
     HashMismatchError,
@@ -21,6 +19,10 @@ from hods._lib.files import (
     detect_format,
     get_object,
     write_object,
+)
+from hods._lib.schemas import (
+    validator,
+    get_schema,
 )
 
 
@@ -301,35 +303,6 @@ class AlbumMetadata:
 def is_mapping(value):
     '''Check if argument value is mapping'''
     return isinstance(value, Mapping)
-
-
-def validator(schema, engine='jsonschema'):
-    '''Factory for creating validator functions'''
-    def validate(data):
-        if schema is None:
-            return
-        if engine == 'jsonschema':
-            return jsonschema.validate(data, schema)
-        else:
-            raise ValueError('unknown schema engine: {}'.format(engine))
-    return validate
-
-
-def get_schema(identificator, engine='jsonschema'):
-    '''Get schema object by schema ID (usually URL)'''
-    # TODO:
-    #   - Fetch schema from URL
-    #   - Fetch schema from package contents
-    #   - Detect known URLs and get them from package instead of URL
-    #   - Use package contents for schemas without path
-    #   - Define fallback URL prefix for schemas without path
-    if not identificator:
-        return None
-    if engine == 'jsonschema':
-        schema_filename = os.path.join('schemas', identificator)
-        return get_object(schema_filename, fileformat='JSON')
-    else:
-        raise ValueError('unknown schema engine: {}'.format(engine))
 
 
 def timestamp():
