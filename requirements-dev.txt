@@ -1,0 +1,5 @@
+# Use these requirements to setup the development environment for HODS
+jsonschema
+strictyaml
+ruamel.yaml
+setuptools

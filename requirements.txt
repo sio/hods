@@ -1,4 +1,0 @@
-jsonschema
-strictyaml
-ruamel.yaml
-setuptools
