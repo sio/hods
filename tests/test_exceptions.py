@@ -15,6 +15,10 @@ class testValidationError(TestCase):
         err = ValidationError()
 
     def test_jsonschema_error(self):
+        self.assertTrue(issubclass(
+            jsonschema.exceptions.ValidationError,
+            ValidationError
+        ))
         self.assertTrue(isinstance(
             jsonschema.exceptions.ValidationError(''),
             ValidationError
