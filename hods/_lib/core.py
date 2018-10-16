@@ -204,6 +204,8 @@ class Metadata:
 
     def validate_hashes(self, write_updates=False, sections=(), required=('md5', 'sha256')):
         '''Check validity of data hashes and write updated values if neccessary'''
+        self.validate()  # check against the schema first
+
         if not sections:
             sections = set(self.info.hashes)
         for section in sections:
