@@ -15,6 +15,7 @@ Supported file formats:
 
 import os
 import json
+import shutil
 from collections import OrderedDict
 import strictyaml
 from ruamel import yaml
@@ -32,16 +33,30 @@ def get_object(filename, fileformat=None):
     return loaders[fileformat](filename)
 
 
-def write_object(obj, filename, fileformat=None):
+def write_object(obj, filename, fileformat=None, backup='.hods~'):
     '''Write serialized object to file. Detect file format if not specified'''
+    if not filename:
+        raise ValueError('can not write data without filename')
     if not fileformat:
         fileformat = detect_format(filename)
+
     writers = {
         'JSON':       write_json,
         'StrictYAML': write_strict_yaml,
         'YAML':       write_yaml,
     }
-    return writers[fileformat](obj, filename)
+
+    if backup:  # create backup file with given suffix
+        try:
+            shutil.copyfile(filename, filename + backup)
+            backup_created = True
+        except FileNotFoundError:  # for writing to new files
+            backup_created = False
+
+    writers[fileformat](obj, filename)
+
+    if backup and backup_created:  # if no errors occured, remove backup file
+        os.remove(filename + backup)
 
 
 def get_files(directory='.', recursive=False):

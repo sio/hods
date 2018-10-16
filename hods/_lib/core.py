@@ -5,7 +5,6 @@ Classes for accessing and manipulating structured data
 
 import json
 import os
-import shutil
 from collections import namedtuple
 from collections.abc import Mapping
 from datetime import datetime, timezone
@@ -16,7 +15,6 @@ from hods import (
 )
 from hods._lib.hash import datahash
 from hods._lib.files import (
-    detect_format,
     get_object,
     write_object,
 )
@@ -176,28 +174,10 @@ class Metadata:
 
     def write(self, filename=None, fileformat=None, backup='.hods~'):
         '''Write changed data structure into the file'''
-
         self.validate_hashes()  # TODO: maybe update hashes implicitly?
-
-        if filename:
-            if not fileformat: fileformat = detect_format(filename)
-        else:
-            filename, fileformat = self._file
-
         if not filename:
-            raise ValueError('can not write data without filename')
-
-        if backup:  # create backup file with given suffix
-            try:
-                shutil.copyfile(filename, filename + backup)
-                backup_created = True
-            except FileNotFoundError:  # for writing to new files
-                backup_created = False
-
-        write_object(self._data, filename, fileformat)
-
-        if backup and backup_created:  # if no errors occured, remove backup file
-            os.remove(filename + backup)
+            filename, fileformat = self._file
+        write_object(self._data, filename, fileformat=fileformat, backup=backup)
 
 
     def validate_hashes(self, write_updates=False, sections=(), required=('md5', 'sha256')):
