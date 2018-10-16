@@ -78,6 +78,7 @@ def load_json(filename):
 
 
 def write_strict_yaml(data, filename):
+    # TODO: https://github.com/crdoconnor/strictyaml/issues/43
     with open(filename, 'w') as f:
         f.write(strictyaml.as_document(data).as_yaml())
 
