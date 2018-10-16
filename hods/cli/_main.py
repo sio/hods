@@ -2,6 +2,7 @@
 Command line interface for HODS
 '''
 
+import os.path
 import sys
 import textwrap
 from importlib import import_module
@@ -38,7 +39,7 @@ def main():
                 if not message or not message.strip():
                     message = submodule.__doc__
                 show_help_message(message.format(
-                    hods=arguments[0],
+                    hods=os.path.basename(arguments[0]),
                     subcommand=subcommand,
                 ))
         else:
