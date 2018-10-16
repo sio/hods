@@ -96,7 +96,7 @@ def read_from_url(url):
     with urllib.request.urlopen(url) as response:
         try:
             encoding = response.headers.get_content_charset()
-        except:
+        except Exception:
             encoding = 'utf-8'
         return response.read().decode(encoding)
 
