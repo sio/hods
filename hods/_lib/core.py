@@ -20,11 +20,7 @@ from hods._lib.files import (
     get_object,
     write_object,
 )
-from hods._lib.schemas import (
-    validator,
-    get_schema,
-)
-
+from hods._lib.schemas import Schema
 
 class TreeStructuredData:
     '''
@@ -169,13 +165,13 @@ class Metadata:
             else:
                 data = json.loads(EMPTY_METADATA_INIT)
 
-        schema = get_schema(data['info']['version'])
-        self._data_container = TreeStructuredData(data, validator=validator(schema))
+        schema = Schema(data['info']['version'])
+        self._data_container = TreeStructuredData(data, validator=schema.validate)
 
         for key in self.info.schema:
             branch = getattr(self, key)
-            schema = get_schema(getattr(self.info.schema, key))
-            branch._validator = validator(schema)
+            schema = Schema(getattr(self.info.schema, key))
+            branch._validator = schema.validate
 
 
     def write(self, filename=None, fileformat=None, backup='.hods~'):
