@@ -69,6 +69,11 @@ class testMetadataHolder(TestCase):
         with self.assertRaises(ValidationError):
             self.file.data.hello = 1
 
+    def test_remote_schema(self):
+        remote = Metadata(filename='tests/data/samples/sample-v1-03-remote_schema.json')
+        with self.assertRaises(ValidationError):
+            remote.hello = 1
+
     def test_hashes(self):
         meta = self.empty
         meta.validate_hashes()  # no-op, test if raises error

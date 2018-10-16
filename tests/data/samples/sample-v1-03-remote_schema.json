@@ -1,0 +1,37 @@
+{
+    "info": {
+        "version": "https://raw.githubusercontent.com/sio/hods/master/tests/data/schemas/metadata-v1.json",
+        "schema": {
+            "data": "https://raw.githubusercontent.com/sio/hods/master/tests/data/schemas/metadata-v1.json"
+        },
+        "hashes": {
+            "data": {
+                "timestamp": "string",
+                "md5": "string",
+                "sha1": "string"
+
+            }
+        }
+    },
+    "data":
+        {
+            "info": {
+                "version": "https://raw.githubusercontent.com/sio/hods/master/tests/data/schemas/metadata-v1.json",
+                "schema": {
+                    "data": "string",
+                    "extra": "string"
+                },
+                "hashes": {
+                    "data": {
+                        "timestamp": "string",
+                        "md5": "string",
+                        "sha1": "string"
+
+                    }
+                }
+            },
+            "data": {},
+            "extra": {}
+        },
+    "extra": {}
+}

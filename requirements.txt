@@ -1,3 +1,4 @@
 jsonschema
 strictyaml
 pyyaml
+setuptools
