@@ -1,4 +1,4 @@
 jsonschema
 strictyaml
-pyyaml
+ruamel.yaml
 setuptools
