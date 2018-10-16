@@ -9,6 +9,7 @@ import jsonschema
 import urllib
 import pkg_resources
 from collections import OrderedDict
+from functools import lru_cache
 
 
 URL_PREFIXES_MIRRORED_IN_PACKAGE = OrderedDict((
@@ -89,6 +90,7 @@ def read_from_package(path):
     return pkg_resources.resource_string(package, path).decode()
 
 
+@lru_cache(maxsize=32)
 def read_from_url(url):
     '''Get text contents from remote URL'''
     with urllib.request.urlopen(url) as response:
