@@ -170,6 +170,7 @@ class Metadata:
             branch = getattr(self, key)
             schema = Schema(getattr(self.info.schema, key))
             branch._validator = schema.validate
+            branch.validate()
 
 
     def write(self, filename=None, fileformat=None, backup='.hods~'):
