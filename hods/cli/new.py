@@ -1,11 +1,12 @@
 '''
-{hods} {subcommand} [--type=ClassName] [FILENAME1] [FILENAME2] ...
+Usage:
+    {hods} {subcommand} [--type=ClassName] [FILENAME1] [FILENAME2] ...
 
-    Create metadata file(s) and open them for editing.
+Create metadata file(s) and open them for editing.
 
-    Supports specifying HODS metadata class names like `--type=Metadata`
-    (default) or arbitrary Python classes with full import path, e.g:
-    `--type=package.module.CustomMetadata`
+Supports specifying HODS metadata class names like `--type=Metadata` (default)
+or arbitrary Python classes with full import path, e.g:
+`--type=package.module.CustomMetadata`
 '''
 
 

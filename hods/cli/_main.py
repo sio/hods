@@ -1,11 +1,31 @@
 '''
-Command line interface for HODS
+Usage: {hods} SUBCOMMAND [ARGUMENTS]
+       {hods} help SUBCOMMAND
+
+Manage structured data stored in plain text files with YAML or JSON formatting.
+
+Available subcommands:
+{subcommands}
+
+To view help message for a specific subcommand use:
+    {hods} help SUBCOMMAND
+
+Copyright 2018 Vitaly Potyarkin
+    https://github.com/sio/hods
+
+This program is Free Software and comes with ABSOLUTELY NO WARRANTY,
+to the extent permitted by applicable law. For more information see:
+    http://www.apache.org/licenses/LICENSE-2.0
 '''
 
 import os.path
+import pkgutil
 import sys
 import textwrap
 from importlib import import_module
+
+
+EXECUTABLE = os.path.basename(sys.argv[0])
 
 
 def main():
@@ -20,7 +40,7 @@ def main():
     `main()` docstring or the module docstring.
     '''
     arguments = sys.argv + [None, None]
-    show_help = arguments[1] == 'help'
+    show_help = arguments[1] in {'help', '--help', '--usage', '-h'}
 
     if show_help:
         subcommand = arguments[2]
@@ -31,7 +51,7 @@ def main():
 
     try:
         submodule = import_module('.' + subcommand, __package__)
-        if show_help or arguments[2] == 'help':
+        if show_help or arguments[2] == '--help':
             try:
                 submodule.help()
             except AttributeError:
@@ -39,7 +59,7 @@ def main():
                 if not message or not message.strip():
                     message = submodule.__doc__
                 show_help_message(message.format(
-                    hods=os.path.basename(arguments[0]),
+                    hods=EXECUTABLE,
                     subcommand=subcommand,
                 ))
         else:
@@ -57,7 +77,16 @@ def main():
 
 def usage():
     '''Show usage message'''
-    show_help_message(__doc__)  # TODO: replace this stub
+    path = os.path.dirname(__file__)
+    subcommands = []
+    for _, name, is_package in pkgutil.iter_modules([path,]):
+        if not is_package and not name.startswith('_'):
+            subcommands.append(name)
+
+    show_help_message(__doc__.format(
+        hods=EXECUTABLE,
+        subcommands='\n'.join('    %s' % sub for sub in sorted(subcommands))
+    ))
 
 
 def show_help_message(message):

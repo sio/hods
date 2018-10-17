@@ -1,9 +1,10 @@
 '''
-{hods} {subcommand} [FILENAME1] [FILENAME2] ...
+Usage:
+    {hods} {subcommand} [FILENAME1] [FILENAME2] ...
 
-    Edit metadata file(s) in default $EDITOR
+Edit metadata file(s) in default $EDITOR
 
-    Data hashes are updated automatically after editing
+Data hashes are updated automatically after editing
 '''
 
 

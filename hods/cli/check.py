@@ -1,7 +1,8 @@
 '''
-{hods} {subcommand} --recursive [FILENAME1] [FILENAME2] ...
+Usage:
+    {hods} {subcommand} --recursive [FILENAME1] [FILENAME2] ...
 
-    Check hash values and validate schemas for metadata file(s).
+Check hash values and validate schemas for metadata file(s).
 '''
 
 
