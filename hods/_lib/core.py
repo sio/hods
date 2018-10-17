@@ -178,7 +178,7 @@ class Metadata:
         self.validate_hashes()  # TODO: maybe update hashes implicitly?
         if not filename:
             filename, fileformat = self._file
-        write_object(self._data, filename, fileformat=fileformat, backup=backup)
+        write_object(self._data, filename, fileformat=fileformat, suffix=backup)
 
 
     def validate_hashes(self, write_updates=False, sections=(), required=('md5', 'sha256')):

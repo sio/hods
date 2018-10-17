@@ -17,6 +17,7 @@ import os
 import json
 import shutil
 from collections import OrderedDict
+from contextlib import contextmanager
 import strictyaml
 from ruamel import yaml
 
@@ -33,7 +34,7 @@ def get_object(filename, fileformat=None):
     return loaders[fileformat](filename)
 
 
-def write_object(obj, filename, fileformat=None, backup='.hods~'):
+def write_object(obj, filename, fileformat=None, suffix='.hods~'):
     '''Write serialized object to file. Detect file format if not specified'''
     if not filename:
         raise ValueError('can not write data without filename')
@@ -46,17 +47,38 @@ def write_object(obj, filename, fileformat=None, backup='.hods~'):
         'YAML':       write_yaml,
     }
 
-    if backup:  # create backup file with given suffix
+    with backup(filename, suffix):
+        writers[fileformat](obj, filename)
+
+
+@contextmanager
+def backup(filename, suffix='.hods~'):
+    '''Context manager to execute dangerous file operations with backup'''
+    suffix_for_duplicates = '{num}~'
+    backup_created = False
+
+    # Create backup file with given suffix
+    if suffix:
+        backup_name = filename + suffix
+        backup_number = 0
+        while os.path.exists(backup_name):  # never overwrite previous backups
+            backup_number += 1
+            backup_name = \
+                filename  \
+                + suffix  \
+                + suffix_for_duplicates.format(num=backup_number)
         try:
-            shutil.copyfile(filename, filename + backup)
+            shutil.copyfile(filename, backup_name)
             backup_created = True
-        except FileNotFoundError:  # for writing to new files
-            backup_created = False
+        except FileNotFoundError:  # no need to backup non-existent files
+            pass
 
-    writers[fileformat](obj, filename)
+    # Do dangerous stuff that may raise exceptions
+    yield
 
-    if backup and backup_created:  # if no errors occured, remove backup file
-        os.remove(filename + backup)
+    # If no exceptions were raised, remove backup file
+    if backup_created:
+        os.remove(backup_name)
 
 
 def get_files(directory='.', recursive=False):
