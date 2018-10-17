@@ -157,11 +157,20 @@ class Metadata:
         else:
             self._file = None
 
-        if data is None:
-            if filename is not None:
-                data = get_object(filename, fileformat)
-            else:
-                data = json.loads(EMPTY_METADATA_INIT, object_pairs_hook=OrderedDict)
+        empty = json.loads(EMPTY_METADATA_INIT, object_pairs_hook=OrderedDict)
+        try:
+            data['info']['version']
+            only_payload = False
+        except Exception:  # assume we are given only payload
+            only_payload = True
+
+        if data is not None and only_payload:
+            empty['data'] = data
+            data = empty
+        elif data is None and filename is not None:
+            data = get_object(filename, fileformat)
+        else:
+            data = empty
 
         schema = Schema(data['info']['version'])
         self._data_container = TreeStructuredData(data, validator=schema.validate)
