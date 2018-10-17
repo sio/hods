@@ -18,8 +18,12 @@ from hods import Metadata
 from hods._lib.files import get_files
 
 
-def main():
-    args = sys.argv + ['', '']
+def main(*args):
+    if args:
+        args = ['', ''] + list(args) + ['', '']
+    else:
+        args = sys.argv + ['', '']
+
     sections = []
     all_sections = False
 

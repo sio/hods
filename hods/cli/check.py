@@ -17,8 +17,11 @@ from hods._lib.files import get_files
 import hods.cli._flags as flags
 
 
-def main():
-    args = sys.argv + ['', '']
+def main(*args):
+    if args:
+        args = ['', ''] + list(args) + ['', '']
+    else:
+        args = sys.argv + ['', '']
 
     if flags.RECURSIVE in args:
         recursive = True
@@ -56,4 +59,5 @@ def main():
         except HashMismatchError:
             print('HASH ERROR')
             exit_code = 1
-    sys.exit(exit_code)
+    if exit_code:
+        sys.exit(exit_code)
