@@ -108,7 +108,7 @@ def get_package_path(url):
     '''
     for prefix, directory in URL_PREFIXES_MIRRORED_IN_PACKAGE.items():
         if url.startswith(prefix):
-            return url.replace(prefix, directory)
+            return url.replace(prefix, directory, 1)
 
 
 def restore_full_schema_id(partial):
