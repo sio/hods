@@ -14,17 +14,15 @@ from hods import (
     HashMismatchError,
 )
 from hods._lib.files import get_files
-
-
-RECURSIVE_FLAG = '--recursive'
+import hods.cli._flags as flags
 
 
 def main():
     args = sys.argv + ['', '']
 
-    if RECURSIVE_FLAG in args:
+    if flags.RECURSIVE in args:
         recursive = True
-        args.pop(args.index(RECURSIVE_FLAG))
+        args.pop(args.index(flags.RECURSIVE))
     else:
         recursive = False
 
