@@ -5,7 +5,7 @@ Classes for accessing and manipulating structured data
 
 import json
 import os
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 from collections.abc import Mapping
 from datetime import datetime, timezone
 
@@ -161,7 +161,7 @@ class Metadata:
             if filename is not None:
                 data = get_object(filename, fileformat)
             else:
-                data = json.loads(EMPTY_METADATA_INIT)
+                data = json.loads(EMPTY_METADATA_INIT, object_pairs_hook=OrderedDict)
 
         schema = Schema(data['info']['version'])
         self._data_container = TreeStructuredData(data, validator=schema.validate)
