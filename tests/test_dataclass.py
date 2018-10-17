@@ -74,6 +74,18 @@ class testMetadataHolder(TestCase):
         with self.assertRaises(ValidationErrors):
             remote.hello = 1
 
+    def test_only_payload(self):
+        payloads = [
+            {'hello': 'world'},
+            {},
+            {'nested': {'hello':'world'}},
+        ]
+        for payload in payloads:
+            with self.subTest(payload=payload):
+                m = Metadata(payload)
+                self.assertEqual(m.info.version, self.empty.info.version)
+                self.assertEqual(m.data._data, payload)
+
     def test_hashes(self):
         meta = self.empty
         meta.validate_hashes()  # no-op, test if raises error
