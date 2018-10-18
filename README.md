@@ -1,4 +1,4 @@
-# HODS - Human Oriented/Owned Data Storage
+# Human Oriented Data Storage (HODS)
 
 Do not depend on any specific piece of software to own your data!
 

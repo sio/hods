@@ -2,9 +2,11 @@ image: python:3.5-alpine
 
 pages:
   script:
+    - pip install -r requirements-dev.txt
     - pip install -r requirements-docs.txt
     - sed -e 's:docs/::g' README.md > docs/index.md
-    - pydoc hods > docs/help.txt
+    - pydoc hods > docs/public-api.txt
+    - cp -r hods/schemas docs/
     - mkdocs build
   artifacts:
     paths:

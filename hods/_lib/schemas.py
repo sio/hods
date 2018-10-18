@@ -14,6 +14,8 @@ from functools import lru_cache
 
 URL_PREFIXES_MIRRORED_IN_PACKAGE = OrderedDict((
     # The first entry is used as default prefix for relative paths
+    ('https://hods.ml/schemas/', 'schemas/'),
+    ('http://hods.ml/schemas/',  'schemas/'),
     ('https://raw.githubusercontent.com/sio/hods/master/hods/schemas/', 'schemas/'),
 ))
 
