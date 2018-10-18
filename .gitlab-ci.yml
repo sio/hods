@@ -1,0 +1,13 @@
+image: python:3.5-alpine
+
+pages:
+  script:
+    - pip install -r requirements-docs.txt
+    - sed -e 's:docs/::g' README.md > docs/index.md
+    - pydoc hods > docs/help.txt
+    - mkdocs build
+  artifacts:
+    paths:
+      - public/
+  only:
+    - master
