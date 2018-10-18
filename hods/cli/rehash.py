@@ -15,7 +15,7 @@ that already have some previous hash value.
 
 import sys
 
-from hods import Metadata
+from hods import Metadata, HashMismatchError
 from hods._lib.files import get_files
 
 
@@ -42,6 +42,10 @@ def main(*args):
         meta = Metadata(filename=filename)
         if all_sections:
             sections = [x for x in meta if x != 'info']
-        meta.validate_hashes(sections=sections, write_updates=True)
-        meta.write()
-        print('Data hashes updated for: {}'.format(filename))
+        try:
+            meta.validate_hashes(sections=sections)
+            print('No changes required for: {}'.format(filename))
+        except HashMismatchError:
+            meta.validate_hashes(sections=sections, write_updates=True)
+            meta.write()
+            print('Data hashes updated for: {}'.format(filename))
