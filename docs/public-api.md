@@ -11,6 +11,9 @@ from hods import Metadata
 meta = Metadata({'hello': 'world'})
 ```
 
+Auto-generated API documentation can be viewed via
+[`help(hods)`](../public-api.txt) in interactive Python console.
+
 ## Classes
 
 ### Metadata
