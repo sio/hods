@@ -46,7 +46,7 @@ else is up to the implementation and can be replaced at any moment.
 The main ideas are:
 
 - **Structured data is to be stored in plain text files** serialized with some
-  markup that is readable both by humans and machines. YAML is a very good
+  markup that is readable both by humans and by machines. YAML is a very good
   example, JSON is mostly OK too. Any other markup language is acceptable.
 - **Each data structure has to be described by a schema** to ensure data validity
   throughout its lifecycle. Jsonschema is a good example, XSD might work for
@@ -98,7 +98,7 @@ Reference implementation supports:
 
 - Storing data in JSON or YAML. StrictYAML is being worked on.
 - Validating the data against JSON schema.
-- Calculating the most common hash sums: md4, md5, sha1, sha2 family.
+- Calculating the most common hash sums: md5, sha1, sha2 family.
 
 The list of supported technologies does not impose any restrictions on authors
 of alternative implementations and may be extended in future.
