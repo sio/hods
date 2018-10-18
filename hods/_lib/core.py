@@ -151,13 +151,36 @@ class Metadata:
     __module__ = _top_level_module
 
 
+    # Define initial state for empty data structure
+    #   - Child classes can override this
+    #   - Parsing JSON on each initialization ensures that instances never
+    #     unintentionally share the data object. It's simpler than to build a
+    #     catch-all deepcopy
+    __EMPTY_JSON = '''
+        {
+            "info": {
+                "version": "metadata-v1.json",
+                "schema": {
+                    "data": ""
+                },
+                "hashes": {
+                    "data": {
+                        "timestamp": "0000-00-00T00:00:00+00:00"
+                    }
+                }
+            },
+            "data": {}
+        }
+    '''
+
+
     def __init__(self, data=None, filename=None, fileformat=None):
         if filename or fileformat:
             self._file = FileInfo(filename, fileformat)
         else:
             self._file = None
 
-        empty = json.loads(EMPTY_METADATA_INIT, object_pairs_hook=OrderedDict)
+        empty = json.loads(self.__EMPTY_JSON, object_pairs_hook=OrderedDict)
         try:
             data['info']['version']
             only_payload = False
@@ -300,21 +323,3 @@ def timestamp():
 
 
 FileInfo = namedtuple('FileInfo', 'name,format')
-
-
-EMPTY_METADATA_INIT = '''
-    {
-        "info": {
-            "version": "metadata-v1.json",
-            "schema": {
-                "data": ""
-            },
-            "hashes": {
-                "data": {
-                    "timestamp": "0000-00-00T00:00:00+00:00"
-                }
-            }
-        },
-        "data": {}
-    }
-'''
