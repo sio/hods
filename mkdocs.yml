@@ -1,0 +1,24 @@
+site_name: Human Oriented Data Storage
+site_description: Documentation for Human Oriented Data Storage (library and application)
+site_author: Vitaly Potyarkin
+site_dir: public
+
+repo_url: https://github.com/sio/hods
+repo_name: sio / hods
+
+nav:
+  - CLI application: commandline.md
+  - Python Library: public-api.md
+  - Specification: specification.md
+
+theme:
+  name: material
+  palette:
+    primary: teal
+    accent: teal
+
+markdown_extensions:
+  - codehilite:
+      guess_lang: false
+  - toc:
+      permalink: '#'
