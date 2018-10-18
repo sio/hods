@@ -9,6 +9,7 @@ repo_name: sio / hods
 nav:
   - CLI application: commandline.md
   - Python Library: public-api.md
+  - Data Schemas: schemas.md
   - Specification: specification.md
 
 theme:
