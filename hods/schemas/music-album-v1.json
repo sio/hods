@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://hods.ml/schemas/music-album-v1.json",
+  "title": "Music album meta information (version 1)",
+  "description": "Schema for HODS payload (https://hods.ml)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "album",
+    "artist",
+    "year",
+    "image_url",
+    "genre",
+    "comment",
+    "composer",
+    "orig_artist",
+    "cd",
+    "tracks"
+  ],
+  "patternProperties": {
+    "^(album|year)$": {
+      "type": "string",
+      "description": "These fields must be non-empty",
+      "minLength": 1
+    },
+    "^(artist|genre|comment|composer|orig_artist|cd)$": {
+      "type": "string",
+      "description": "These fields may be empty"
+    },
+    "image_url": {
+      "description": "Either a single URL or a list of URLs",
+      "oneOf": [
+        {"type": "string"},
+        {"type": "array", "items": {"type": "string", "minLength": 1}}
+      ]
+    },
+    "tracks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "Information about each track",
+        "additionalProperties": false,
+        "required": ["number", "title", "artist"],
+        "properties": {
+          "number": {"type": ["string", "integer"]},
+          "title": {"type": "string", "minLength": 1},
+          "artist": {"type": "string"}
+        }
+      }
+    }
+  }
+}
