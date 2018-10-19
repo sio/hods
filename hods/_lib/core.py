@@ -272,11 +272,17 @@ class Metadata:
 
 
     def __repr__(self):
-        return '<{cls} object (schema={schema}, id={id})>'.format(
+        return '<{cls}(schema={schema!r}, id={id!r})>'.format(
             cls = self.__class__.__name__,
             schema = self.info.version,
             id = id(self),
         )
+
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            return self._data_container == other._data_container
+        else:
+            return NotImplemented
 
 
     def __getitem__(self, key):
