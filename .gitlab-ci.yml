@@ -5,7 +5,9 @@ pages:
     - pip install -r requirements-dev.txt
     - pip install -r requirements-docs.txt
     - sed -e 's:docs/::g' README.md > docs/index.md
-    - pydoc hods > docs/public-api.txt
+    - echo -e '# API overview (auto-generated)\n\n```' > docs/public-api-auto.md
+    - pydoc hods >> docs/public-api-auto.md
+    - echo '```' >> docs/public-api-auto.md
     - cp -r hods/schemas docs/
     - mkdocs build
   artifacts:
