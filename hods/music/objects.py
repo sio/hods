@@ -13,6 +13,9 @@ class MusicMetadata(Metadata):
     '''
     Manipulate music metadata with HODS
     '''
+    _SUPPORTED_SCHEMAS = [  # first one is used for creating empty objects
+        'https://hods.ml/schemas/music-album-v1.json',
+    ]
     _EMPTY_JSON = '''
         {
           "album": "...",
@@ -34,13 +37,10 @@ class MusicMetadata(Metadata):
             payload = load(self._EMPTY_JSON)
             data = load(Metadata._EMPTY_JSON)
             data['data'] = payload
-            data['info']['schema']['data'] = 'https://hods.ml/schemas/music-album-v1.json'
+            data['info']['schema']['data'] = self._SUPPORTED_SCHEMAS[0]
+
         super().__init__(data, filename, fileformat)
 
-
-
-class MusicAlbum():
-    '''
-    Stable API for managing music metadata. Does not depend on the schema used
-    '''
-    pass
+        schema = self.info.schema.data
+        if schema not in self._SUPPORTED_SCHEMAS:
+            raise ValueError('schema is not supported: {}'.format(schema))

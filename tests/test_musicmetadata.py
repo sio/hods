@@ -22,6 +22,10 @@ class testMusicMetadata(TestCase):
         with self.assertRaises(ValidationErrors):
             m.album = ''  # defined as non-empty in schema
 
+    def test_unsupported_schema(self):
+        with self.assertRaises(ValueError):
+            MusicMetadata(filename='tests/data/samples/sample-v1-02.json')
+
 class Temp:
     pass
 

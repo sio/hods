@@ -300,6 +300,7 @@ class TranslatorWrapper:
     '''
     Helper class to simplify class composition and wrapping properties
     '''
+    # TODO: TranslatorWrapper is not actually used anywhere. Will be deleted eventually
     _reserved = {'_wrap', '_base'}
     _wrap = {}  # attribute translation rules
 
@@ -320,14 +321,6 @@ class TranslatorWrapper:
             setattr(self._base, self._wrap[attr], value)
         else:
             return super().__setattr__(attr, value)
-
-
-
-class AlbumMetadata:
-    '''
-    Stable API for music album metadata
-    '''
-    pass
 
 
 
