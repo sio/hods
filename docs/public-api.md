@@ -63,7 +63,8 @@ Arguments:
 
 - `filename` - Path to the destination file. If file does not exist, it will
   be created. If its parent directory does not exist, an exception will be
-  raised.
+  raised. If no filename is provided, the data structure will be written back
+  to the same file it was loaded from.
 - `fileformat` - A string specifying the file format. If not provided, the
   file format will be detected based upon the file extension.
 - `backup` - Suffix for backup files. If write operation finishes

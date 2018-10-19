@@ -32,12 +32,12 @@ To view help message for a specific subcommand use:
 ### hods check
 
 ```
-hods check --recursive [FILENAME1] [FILENAME2] ...
+hods check [--recursive] [FILENAME1] [FILENAME2] ...
 ```
 
 Check hash values and validate schemas for metadata file(s).
 
-Outputs short status message for each of checked files. If not files are
+Outputs short status message for each of checked files. If no files are
 listed in the commandline `check` looks for known filetypes in the current
 directory (and in its subdirectories if `--recursive` tag is specified).
 
