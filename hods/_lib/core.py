@@ -299,11 +299,27 @@ class Metadata:
 class TranslatorWrapper:
     '''
     Helper class to simplify class composition and wrapping properties
-
-    THIS IS NOT NECESSARY. SIMPLY DEFINE REQUIRED METHODS AND PROPERTIES IN
-    AlbumMetadata
     '''
-    pass
+    _reserved = {'_wrap', '_base'}
+    _wrap = {}  # attribute translation rules
+
+
+    def __init__(self, base):
+        self._base = base
+
+
+    def __getattr__(self, attr):
+        if attr not in self._reserved and attr in self._wrap:
+            return getattr(self._base, self._wrap[attr])
+        else:
+            return super().__getattr__(attr)
+
+
+    def __setattr__(self, attr, value):
+        if attr not in self._reserved and attr in self._wrap:
+            setattr(self._base, self._wrap[attr], value)
+        else:
+            return super().__setattr__(attr, value)
 
 
 

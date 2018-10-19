@@ -36,3 +36,11 @@ class MusicMetadata(Metadata):
             data['data'] = payload
             data['info']['schema']['data'] = 'https://hods.ml/schemas/music-album-v1.json'
         super().__init__(data, filename, fileformat)
+
+
+
+class MusicAlbum():
+    '''
+    Stable API for managing music metadata. Does not depend on the schema used
+    '''
+    pass
