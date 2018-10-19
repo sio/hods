@@ -156,7 +156,7 @@ class Metadata:
     #   - Parsing JSON on each initialization ensures that instances never
     #     unintentionally share the data object. It's simpler than to build a
     #     catch-all deepcopy
-    __EMPTY_JSON = '''
+    _EMPTY_JSON = '''
         {
             "info": {
                 "version": "metadata-v1.json",
@@ -180,7 +180,7 @@ class Metadata:
         else:
             self._file = None
 
-        empty = json.loads(self.__EMPTY_JSON, object_pairs_hook=OrderedDict)
+        empty = json.loads(self._EMPTY_JSON, object_pairs_hook=OrderedDict)
         try:
             data['info']['version']
             only_payload = False
