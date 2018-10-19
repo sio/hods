@@ -192,7 +192,7 @@ class Metadata:
             data = empty
         elif data is None and filename is not None:
             data = get_object(filename, fileformat)
-        else:
+        elif data is None:
             data = empty
 
         schema = Schema(data['info']['version'])
