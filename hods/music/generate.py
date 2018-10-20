@@ -1,6 +1,7 @@
 '''
 Usage:
-    {hods} {subcommand} --target=album_hods.yml DIRECTORY1 [DIRECTORY2] ...
+    {hods} {subcommand} [--target=album_hods.yml] [--recursive]
+        DIRECTORY1 [DIRECTORY2] ...
 
 Read music metadata from album directories. Each directory is assumed to
 contain a single album. Nested subdirectories are not evaluated.
@@ -15,6 +16,7 @@ import os
 import sys
 
 from hods.music.objects import MusicAlbumInfo
+from hods.cli import _flags as flags
 
 
 TARGET_FLAG = '--target='
@@ -27,6 +29,12 @@ def main(*args):
     else:
         args = sys.argv + ['', '']
 
+    if flags.RECURSIVE in args:
+        recursive = True
+        args.pop(args.index(flags.RECURSIVE))
+    else:
+        recursive = False
+
     target = TARGET_DEFAULT
     for a in args:
         if a.startswith(TARGET_FLAG):
@@ -38,13 +46,17 @@ def main(*args):
     for dirname in directories:
         filename = os.path.join(dirname, target)
         if os.path.exists(filename):
-            raise ValueError(
-                'metadata file already exists: {}'.format(filename)
-            )
+            print('Metadata file already exists: {}'.format(filename))
+            continue
         meta = MusicAlbumInfo()
         meta.parse(dirname)
         if len(meta.data.tracks):
             meta.write(filename)
             print('Metadata written: {}'.format(filename))
-        else:
-            print('Nothing to write for: {}'.format(dirname))
+
+        if recursive:
+            parent, subdirs, files = next(os.walk(dirname))
+            main(
+                *(os.path.join(parent, subdir) for subdir in subdirs),
+                flags.RECURSIVE
+            )
