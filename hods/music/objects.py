@@ -12,7 +12,7 @@ from tinytag import TinyTag
 from hods import Metadata
 
 
-class MusicMetadata(Metadata):
+class MusicAlbumInfo(Metadata):
     '''
     Manipulate music metadata with HODS
     '''
@@ -52,7 +52,7 @@ class MusicMetadata(Metadata):
     def parse(self, dirname):
         '''Parse tags for all files in the directory (non-recursive'''
         album_info = OrderedDict((
-            # MusicMetadata field: TinyTag field
+            # MusicAlbumInfo field: TinyTag field
             ('album', 'album'),
             ('artist', 'albumartist'),
             ('year', 'year'),

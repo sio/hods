@@ -6,17 +6,17 @@ Unit tests for music metadata objects
 from unittest import TestCase
 
 from hods import ValidationErrors
-from hods.music.objects import MusicMetadata
+from hods.music.objects import MusicAlbumInfo
 from hods._lib.core import TranslatorWrapper
 
 
-class testMusicMetadata(TestCase):
+class testMusicAlbumInfo(TestCase):
 
     def test_empty_init(self):
-        m = MusicMetadata()
+        m = MusicAlbumInfo()
 
     def test_payload_validation(self):
-        m = MusicMetadata()
+        m = MusicAlbumInfo()
         with self.assertRaises(ValidationErrors):
             m['disallowed key'] = 1
         with self.assertRaises(ValidationErrors):
@@ -24,7 +24,7 @@ class testMusicMetadata(TestCase):
 
     def test_unsupported_schema(self):
         with self.assertRaises(ValueError):
-            MusicMetadata(filename='tests/data/samples/sample-v1-02.json')
+            MusicAlbumInfo(filename='tests/data/samples/sample-v1-02.json')
 
 class Temp:
     pass
