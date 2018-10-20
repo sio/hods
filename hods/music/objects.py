@@ -113,7 +113,7 @@ class MusicAlbumInfo(Metadata):
             setattr(self.data, field, value)
 
         # Detect album artist
-        if not self.data.artist:
+        if not self.data.artist and len(tracks_collected):
             track_artists = set()
             for track in tracks_collected:
                 track_artists.add(track['artist'])
