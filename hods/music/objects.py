@@ -12,6 +12,9 @@ from tinytag import TinyTag
 from hods import Metadata
 
 
+VARIOUS_ARTISTS = 'Various Artists'
+
+
 class MusicAlbumInfo(Metadata):
     '''
     Manipulate music metadata with HODS
@@ -116,6 +119,10 @@ class MusicAlbumInfo(Metadata):
                 track_artists.add(track['artist'])
             if len(track_artists) == 1:
                 self.data.artist = track_artists.pop()
+            elif len(track_artists) > 1:
+                self.data.artist = VARIOUS_ARTISTS
+            else:
+                raise ValueError('no artist defined for: {}'.format(dirname))
 
         # Do not write the same artist name into each track
         for track in tracks_collected:
