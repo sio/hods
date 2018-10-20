@@ -101,15 +101,8 @@ class MusicAlbumInfo(Metadata):
                 value = values.pop()
             elif len(values) == 0:
                 value = ''
-            elif len(values) > 1 and field in {'artist', 'comment'}:
+            elif len(values) > 1:
                 value = ', '.join(sorted(values))
-            else:
-                raise ValueError(
-                    'unexpected multiple values for {}: {!r}'.format(
-                        field,
-                        tuple(values),
-                    )
-                )
             setattr(self.data, field, value)
 
         # Detect album artist
