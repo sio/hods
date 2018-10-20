@@ -159,7 +159,7 @@ class Metadata:
     __EMPTY_JSON = '''
         {
             "info": {
-                "version": "metadata-v1.json",
+                "version": "https://hods.ml/schemas/metadata-v1.json",
                 "schema": {
                     "data": ""
                 },
