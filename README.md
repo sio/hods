@@ -40,8 +40,8 @@ project exists.
 
 To make the idea of Human Oriented Data Storage time proof and extremely
 portable we intend to impose as little restrictions as possible. In fact, the
-whole specification boils down to less than a dozen data points. Everything
-else is up to the implementation and can be replaced at any moment.
+whole [specification][spec] boils down to less than a dozen data points.
+Everything else is up to the implementation and can be replaced at any moment.
 
 The main ideas are:
 
@@ -61,7 +61,7 @@ The main ideas are:
 
 And that's it! To enable compatibility between different implementations the
 required information has to be stored in the following way (the corresponding
-JSON schema is available in reference implementation):
+JSON [schema][schemas] is available in reference implementation):
 
 ```javascript
 {
@@ -92,7 +92,7 @@ JSON schema is available in reference implementation):
 ## Reference implementation
 
 This repository contains the reference implementation of HODS ideas in Python
-language: a library and a command-line application.
+language: a [library] and a [command-line application][cli].
 
 Reference implementation supports:
 
@@ -178,3 +178,9 @@ Copyright 2018 Vitaly Potyarkin
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
+
+
+[cli]:     docs/commandline.md
+[library]: docs/public-api.md
+[schemas]: docs/schemas.md
+[spec]:    docs/specification.md
