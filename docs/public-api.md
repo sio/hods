@@ -1,7 +1,7 @@
 # Public API of HODS Python implementation
 
-HODS exposes a Python library to allow other developers to add HODS support to
-their applications.
+HODS exposes a Python library to allow other developers to add Human Oriented
+Data Storage support to their applications.
 
 All public API entry points are available from the top level `hods` package,
 e.g.:

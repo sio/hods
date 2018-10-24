@@ -1,7 +1,8 @@
 # Command line interface to HODS
 
 HODS offers an easy to use command line interface inspired by git. All
-actions are relayed to one of subcommands.
+actions are relayed to one of subcommands. Use this tool to manage structured
+data following the Human Oriented Data Storage [specification].
 
 To invoke command line interface either use `hods` or execute the Python
 module directly: `python -m hods`.
@@ -87,3 +88,6 @@ sections.
 
 If no section names are provided, hashes will be calculated only for sections
 that already have some previous hash value.
+
+
+[specification]: specification.md
