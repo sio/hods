@@ -171,7 +171,7 @@ class DocumentsReadOnlyCache:
             ).delete()
 
 
-    def get(self, attrs, steps=(), by_prefix=True):
+    def get(self, attrs, steps=(), by_value=False):
         '''
         Iterate over the content filtered with simplified query steps.
         Duplicate entries are not repeated.
@@ -180,13 +180,13 @@ class DocumentsReadOnlyCache:
         '''
         if isinstance(attrs, str):
             attrs = (attrs,)
-        query = self._make_query(tuple(attrs), tuple(steps), by_prefix)
+        query = self._make_query(tuple(attrs), tuple(steps), by_value)
         with self.session() as session:
             yield from query.with_session(session)
 
 
     @lru_cache(maxsize=64)
-    def _make_query(self, attrs=None, steps=None, by_prefix=True):
+    def _make_query(self, attrs=None, steps=None, by_value=False):
         '''
         Build a database query to retrieve unique values corresponding to the
         sequence of hierarchy steps in the tree data structure
@@ -199,7 +199,7 @@ class DocumentsReadOnlyCache:
             target = Content
         else:
             target = [getattr(Content, a) for a in attrs]
-        if by_prefix:
+        if not by_value:
             condition = (Content.prefix == prefix)
         else:
             condition = (Content.fullkey == prefix)
