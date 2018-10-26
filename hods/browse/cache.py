@@ -147,12 +147,12 @@ class DocumentsReadOnlyCache:
                 # Add file contents to cache
                 for row in walk_tree(content):
                     record = Content(
-                        path=datafile,
-                        key=row.fullkey,
-                        key_prefix=row.prefix,
-                        key_suffix=row.key,
-                        value=row.value,
-                        is_leaf=row.leafnode,
+                        path    = datafile,
+                        fullkey = row.fullkey,
+                        prefix  = row.prefix,
+                        key     = row.key,
+                        value   = row.value,
+                        is_leaf = row.leafnode,
                     )
                     session.add(record)
 
@@ -225,18 +225,19 @@ class Content(Base):
     '''Full contents for all files added to cache'''
     __tablename__ = 'content'
 
-    path       = Column(
-                    String,
-                    ForeignKey('files.path', ondelete='CASCADE', onupdate='CASCADE')
-                 )  # TODO: foreign_keys enforcement is disabled by default in sqlite
-    key        = Column(String, primary_key=True)
-    key_prefix = Column(String)
-    key_suffix = Column(String)
-    value      = Column(String)
-    is_leaf    = Column(Boolean)
-    seen       = Column(Integer)
+    path    = Column(
+                 String,
+                 ForeignKey('files.path', ondelete='CASCADE', onupdate='CASCADE'),
+                 primary_key=True
+              )
+    fullkey = Column(String, primary_key=True)
+    prefix  = Column(String)
+    key     = Column(String)
+    value   = Column(String)
+    is_leaf = Column(Boolean)
+    seen    = Column(Integer)
 
-    file       = relationship('File', back_populates='content')
+    file    = relationship('File', back_populates='content')
 
 
 

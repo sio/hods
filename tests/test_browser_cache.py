@@ -15,8 +15,8 @@ class testCacheORM(TestCase):
         cache = DocumentsReadOnlyCache(':memory:')
         with cache.session() as session:
             f = File(path='hello')
-            c = Content(path='hello', key='1')
-            c1 = Content(path='hello world', key='2')
+            c = Content(path='hello', fullkey='1')
+            c1 = Content(path='hello world', fullkey='2')
             session.add(f)
             session.add(c)
             session.add(c1)
