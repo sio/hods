@@ -6,6 +6,7 @@ Tests for SQLite-backed cache engine
 from unittest import TestCase, skip
 
 from hods.browse.cache import DocumentsReadOnlyCache, File, Content, Info
+from hods.browse.shell import DocumentBrowser
 
 
 
@@ -50,3 +51,8 @@ class testCacheORM(TestCase):
         files = list(cache.get('path'))
         self.assertEqual(len(files), 2)
         self.assertEqual(len(top), 3) # info, data, extra
+
+    def test_browser(self):
+        shell = DocumentBrowser(':memory:', 'tests/data/samples')
+        #import pdb; pdb.set_trace()
+        shell.cmdloop()
