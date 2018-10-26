@@ -3,6 +3,7 @@ Interactive shell for browsing HODS documents
 '''
 
 
+import shlex
 from cmd import Cmd
 from collections import namedtuple, OrderedDict
 from functools import lru_cache
@@ -60,11 +61,21 @@ class DocumentBrowser(Cmd):
         '''Do nothing on empty command line'''
 
 
-    def do_ls(self, args):
+    def do_ls(self, line):
+        try:
+            args = Args(line, no_value=True)
+        except ArgumentError as e:
+            print('ls: {}'.format(e.message))
+            return
         print('\n'.join(self.path_items.keys()))
 
 
-    def do_cd(self, target):
+    def do_cd(self, line):
+        try:
+            target = Args(line, single_value=True).argv[0]
+        except ArgumentError as e:
+            print('cd: {}'.format(e.message))
+            return
         if target in self.path_items:
             if [p.is_leaf for p in self.path[-2:]] == [True, True]:
                 print('cd: can not go any deeper')
@@ -76,27 +87,69 @@ class DocumentBrowser(Cmd):
             print('cd: can not browse {!r}'.format(target))
 
 
-    def do_up(self, args=None):
+    def do_up(self, line=None):
         '''Go up one level in hierarchy'''
+        try:
+            args = Args(line, no_value=True)
+        except ArgumentError as e:
+            print('up: {}'.format(e.message))
+            return
         try:
             self.path.pop()
         except IndexError:  # already at top level
             pass
 
 
-    def do_pwd(self, args=None):
+    def do_pwd(self, line=None):
         '''Show path to current position in data hierarchy'''
+        try:
+            args = Args(line, no_value=True)
+        except ArgumentError as e:
+            print('pwd: {}'.format(e.message))
+            return
         print('/' + '/'.join(p.step for p in self.path))
 
 
-    def do_debug(self, args=None):
+    def do_debug(self, line=None):
         '''Launch Python debugger'''
         import pdb; pdb.set_trace()
 
 
-    def do_exit(self, args):
+    def do_exit(self, line):
         '''Exit interactive document browser'''
         return True
 
 
     do_EOF = do_exit
+
+
+
+class ArgumentError(ValueError):
+    '''Raised when a command receives invalid arguments from user'''
+
+    @property
+    def message(self):
+        '''Fast access to the exception message'''
+        if self.args:
+            return self.args[0]
+
+
+
+class Args:
+    '''
+    Handle command line arguments in interactive shell
+    '''
+
+
+    def __init__(self, line, single_value=False, no_value=False):
+        '''Parse argument string'''
+        self.raw = line
+        self.argv = shlex.split(self.raw)
+        if single_value and len(self.argv) != 1:
+            raise ArgumentError('expected one argument, but got {}: {}'.format(
+                len(self.argv), self.raw
+            ))
+        if no_value and self.argv:
+            raise ArgumentError('expected no arguments, but got: {}'.format(
+                self.raw
+            ))
