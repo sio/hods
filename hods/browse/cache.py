@@ -7,6 +7,7 @@ import os
 import time
 from collections import namedtuple
 from contextlib import contextmanager
+from functools import lru_cache
 
 from sqlalchemy import (
     Boolean,
@@ -20,6 +21,7 @@ from sqlalchemy import (
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import (
+    Query,
     relationship,
     sessionmaker,
 )
@@ -47,11 +49,6 @@ class DocumentsReadOnlyCache:
         self._init_db()
         if not self._check_version():
             self._init_db(reinit=True)
-
-
-    def __del__(self):
-        '''Clean up'''
-        self.db.dispose()  # clear the connections pool
 
 
     @contextmanager
@@ -172,6 +169,41 @@ class DocumentsReadOnlyCache:
             session.query(File).filter( \
                 (File.seen != self.timestamp) | (File.seen == None) \
             ).delete()
+
+
+    def get(self, attrs, steps=(), by_prefix=True):
+        '''
+        Iterate over the content filtered with simplified query steps.
+        Duplicate entries are not repeated.
+
+        Return values of specified fields (attrs).
+        '''
+        if isinstance(attrs, str):
+            attrs = (attrs,)
+        query = self._make_query(tuple(attrs), tuple(steps), by_prefix)
+        with self.session() as session:
+            yield from query.with_session(session)
+
+
+    @lru_cache(maxsize=64)
+    def _make_query(self, attrs=None, steps=None, by_prefix=True):
+        '''
+        Build a database query to retrieve unique values corresponding to the
+        sequence of hierarchy steps in the tree data structure
+        '''
+        if not steps:
+            prefix = None
+        else:
+            prefix = SEPARATOR.join(steps)
+        if not attrs:
+            target = Content
+        else:
+            target = [getattr(Content, a) for a in attrs]
+        if by_prefix:
+            condition = (Content.prefix == prefix)
+        else:
+            condition = (Content.fullkey == prefix)
+        return Query(target).filter(condition).distinct()
 
 
 TreeRow = namedtuple('TreeRow', 'fullkey,prefix,key,value,leafnode')
