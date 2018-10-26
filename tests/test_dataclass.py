@@ -11,6 +11,7 @@ from hods import (
     ValidationErrors,
 )
 from hods._lib.hash import struct_hash
+from hods.browse.cache import walk_tree
 
 
 class testTreeWrapper(TestCase):
@@ -55,6 +56,12 @@ class testTreeWrapper(TestCase):
         self.assertEqual(self.data['tree']['inner'], 'new')
         self.data['tree']['inner'] = 'new2'
         self.assertEqual(self.data.tree.inner, 'new2')
+
+    def test_walk_tree(self):
+        flat_container = list(walk_tree(self.data))
+        flat_data = list(walk_tree(self.data._data))
+        self.assertEqual(flat_data, flat_container)
+        self.assertEqual(len(flat_data), 7)
 
 
 class testMetadataHolder(TestCase):

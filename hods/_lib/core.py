@@ -311,7 +311,9 @@ class AlbumMetadata:
 
 def is_mapping(value):
     '''Check if argument value is mapping'''
-    return isinstance(value, Mapping)
+    return isinstance(value, Mapping) \
+        or isinstance(value, TreeStructuredData) \
+        or isinstance(value, Metadata)
 
 
 def timestamp():

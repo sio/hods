@@ -4,10 +4,11 @@ Sqlite-backed cache for multiple HODS documents
 
 
 import os
+import time
+from collections import namedtuple
 from contextlib import contextmanager
 
 from sqlalchemy import (
-    BigInteger,
     Boolean,
     Column,
     DateTime,
@@ -24,6 +25,12 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.pool import NullPool
 
+from hods import Metadata
+from hods._lib.core import is_mapping
+from hods._lib.files import get_files
+
+
+SEPARATOR = '.'  # separates nested keys when flattening tree data
 
 
 class DocumentsReadOnlyCache:
@@ -35,11 +42,11 @@ class DocumentsReadOnlyCache:
 
     def __init__(self, cache_db):
         '''Initialize cache database in file provided by path'''
-        self.filename = os.path.abspath(cache_db)
-        self.db = create_engine('sqlite:///{}'.format(self.filename))
-        self.sessionmaker = sessionmaker(bind=self.db)
+        self.filename = cache_db if cache_db==':memory:' else os.path.abspath(cache_db)
+        self.timestamp = int(time.time())
+        self._init_db()
         if not self._check_version():
-            self._reinit_db()
+            self._init_db(reinit=True)
 
 
     def __del__(self):
@@ -73,28 +80,123 @@ class DocumentsReadOnlyCache:
                 return False
 
 
-    def _reinit_db(self):
+    def _init_db(self, reinit=False):
         '''(Re)initialize empty cache database'''
-        if os.path.exists(self.filename):
+        in_memory = self.filename == ':memory:'
+
+        if reinit and not in_memory and os.path.exists(self.filename):
             os.remove(self.filename)
 
-        self.db = create_engine('sqlite:///{}'.format(self.filename))
+        if in_memory:
+            connection_url = 'sqlite://'
+        else:
+            connection_url = 'sqlite:///{}'.format(self.filename)
+
+        self.db = create_engine(connection_url)
         Base.metadata.create_all(self.db)
         self.sessionmaker = sessionmaker(bind=self.db)
 
-        version_key, version_valid = self.SCHEMA_VERSION
-        version = Info(option=version_key, value=version_valid)
-        with self.session() as session:
-            session.add(version)
+        if reinit:
+            version_key, version_valid = self.SCHEMA_VERSION
+            version = Info(option=version_key, value=version_valid)
+            with self.session() as session:
+                session.add(version)
 
 
     def add(self, filename=None, directory=None):
-        pass
+        '''Add HODS data files to cache'''
+        if filename is not None and directory is not None:
+            raise ValueError('only one argument is allowed: either filename or directory')
+        elif filename is not None:
+            files = [filename,]
+        elif directory is not None:
+            files = get_files(directory, recursive=True)
+        else:
+            files = []
+
+        for datafile in files:
+            with self.session() as session:
+                datafile = os.path.abspath(datafile)
+
+                # Check if file is already in cache and that cache is valid
+                current = os.stat(datafile)
+                size, ctime, mtime = map(int, (current.st_size, current.st_ctime, current.st_mtime))
+                cached = session.query(File).filter(File.path == datafile).first()
+                cache_is_valid = \
+                    cached is not None and \
+                    (size, ctime, mtime) == (cached.size, cached.ctime, cached.mtime)
+                if cache_is_valid:
+                    cached.seen = self.timestamp
+                    continue
+
+                # Drop outdated caches, skip invalid documents
+                if cached is not None:
+                    session.delete(cached)
+                try:
+                    content = Metadata(filename=datafile)
+                except Exception:
+                    continue
+
+                # Add file description to cache
+                file_ = File()
+                file_.path  = datafile
+                file_.size, file_.ctime, file_.mtime = size, ctime, mtime
+                file_.seen  = self.timestamp
+                session.add(file_)
+
+                # Add file contents to cache
+                for row in walk_tree(content):
+                    record = Content(
+                        path=datafile,
+                        key=row.fullkey,
+                        key_prefix=row.prefix,
+                        key_suffix=row.key,
+                        value=row.value,
+                        is_leaf=row.leafnode,
+                    )
+                    session.add(record)
 
 
     def drop(self, filename):
-        pass
+        '''Remove file decription and its contents from cache'''
+        filename = os.path.abspath(filename)
+        with self.session() as session:
+            session.query(File).filter(File.path == filename).delete()
 
+
+    def drop_outdated(self):
+        '''Clear all outdated cache entries'''
+        # Content entries are removed automatically thanks to SQLAlchemy
+        # relationship(cascade=...) feature
+        with self.session() as session:
+            session.query(File).filter( \
+                (File.seen != self.timestamp) | (File.seen == None) \
+            ).delete()
+
+
+TreeRow = namedtuple('TreeRow', 'fullkey,prefix,key,value,leafnode')
+def walk_tree(tree, prefix=None):
+    '''
+    Flatten tree data into a sequence of rows
+    (keys and values are coerced into strings)
+    '''
+    for key in tree:  # Metadata objects have no .items() method
+        value = tree[key]
+        key = str(key)
+        if prefix:
+            full = SEPARATOR.join((prefix, key))
+        else:
+            full = key
+        if is_mapping(value):
+            yield TreeRow(full, prefix, key, None, False)
+            yield from walk_tree(value, full)
+        else:
+            yield TreeRow(full, prefix, key, str(value), True)
+
+
+#
+# SQLAlchemy configuration
+#
 
 
 Base = declarative_base()
@@ -105,10 +207,10 @@ class File(Base):
     __tablename__ = 'files'
 
     path  = Column(String, primary_key=True)
-    size  = Column(BigInteger)
-    mtime = Column(DateTime)
-    ctime = Column(DateTime)
-    seen  = Column(String)
+    size  = Column(Integer)
+    mtime = Column(Integer)
+    ctime = Column(Integer)
+    seen  = Column(Integer)
 
     content = relationship(
                     'Content',
@@ -132,6 +234,7 @@ class Content(Base):
     key_suffix = Column(String)
     value      = Column(String)
     is_leaf    = Column(Boolean)
+    seen       = Column(Integer)
 
     file       = relationship('File', back_populates='content')
 
