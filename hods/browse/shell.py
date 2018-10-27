@@ -42,7 +42,7 @@ class DocumentBrowser(Cmd):
         if last_is_leaf == [True, True]: # second-last item is also leaf
             field = 'path'
             path = path[:-1]
-        elif last_is_leaf == [False, True]:  # only the last item is leaf
+        elif last_is_leaf and last_is_leaf[-1] == True:  # only the last item is leaf
             field = 'value'
         else:
             field = 'key'
