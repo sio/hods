@@ -72,6 +72,7 @@ class DocumentBrowser(Cmd):
 
 
     def do_ls(self, line):
+        '''Show possible branches to go from current position'''
         try:
             args = Args(line, no_value=True)
         except ArgumentError as e:
@@ -81,6 +82,7 @@ class DocumentBrowser(Cmd):
 
 
     def do_cd(self, line):
+        '''Go one level deeper into data hierarchy'''
         try:
             target = Args(line, single_value=True).argv[0]
         except ArgumentError as e:
