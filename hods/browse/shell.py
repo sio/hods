@@ -15,8 +15,6 @@ PathItem = namedtuple('PathItem', 'step,is_leaf')
 
 
 class DocumentBrowser(Cmd):
-    # TODO: parse commandline arguments from string
-
     intro = 'Interactive document browser for HODS (https://hods.ml)'
     prompt = '(hods) > '
 
@@ -87,7 +85,7 @@ class DocumentBrowser(Cmd):
             print('cd: can not browse {!r}'.format(target))
 
 
-    def do_up(self, line=None):
+    def do_up(self, line=''):
         '''Go up one level in hierarchy'''
         try:
             args = Args(line, no_value=True)
@@ -100,7 +98,7 @@ class DocumentBrowser(Cmd):
             pass
 
 
-    def do_pwd(self, line=None):
+    def do_pwd(self, line=''):
         '''Show path to current position in data hierarchy'''
         try:
             args = Args(line, no_value=True)
@@ -110,7 +108,7 @@ class DocumentBrowser(Cmd):
         print('/' + '/'.join(p.step for p in self.path))
 
 
-    def do_debug(self, line=None):
+    def do_debug(self, line=''):
         '''Launch Python debugger'''
         import pdb; pdb.set_trace()
 
