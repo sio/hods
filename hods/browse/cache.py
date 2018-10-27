@@ -45,10 +45,15 @@ class DocumentsReadOnlyCache:
     def __init__(self, cache_db):
         '''Initialize cache database in file provided by path'''
         self.filename = cache_db if cache_db==':memory:' else os.path.abspath(cache_db)
-        self.timestamp = int(time.time())
+        self.update_timestamp()
         self._init_db()
         if not self._check_version():
             self._init_db(reinit=True)
+
+
+    def update_timestamp(self):
+        '''Update object timestamp before recaching documents'''
+        self.timestamp = int(time.time())
 
 
     @contextmanager

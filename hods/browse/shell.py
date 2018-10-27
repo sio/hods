@@ -25,8 +25,7 @@ class DocumentBrowser(Cmd):
         self.directory = browse_directory
         self.path = list()  # sequence of PathItem tuples
         self.cache = DocumentsReadOnlyCache(cache_file)
-        self.cache.add(directory=self.directory)
-        self.cache.drop_outdated()
+        self.do_recache()
 
 
     @property
@@ -57,6 +56,19 @@ class DocumentBrowser(Cmd):
 
     def emptyline(self):
         '''Do nothing on empty command line'''
+
+
+    def do_recache(self, line=''):
+        '''Reread documents from disk to browser cache'''
+        try:
+            Args(line, no_value=True)
+        except ArgumentError as e:
+            print('recache: {}'.format(e.message))
+            return
+        self._list_items.cache_clear()
+        self.cache.update_timestamp()
+        self.cache.add(directory=self.directory)
+        self.cache.drop_outdated()
 
 
     def do_ls(self, line):
