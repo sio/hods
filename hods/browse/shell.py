@@ -71,6 +71,16 @@ class DocumentBrowser(Cmd):
         self.cache.drop_outdated()
 
 
+    def do_files(self, line=''):
+        '''Show files that match the current query'''
+        try:
+            Args(line, no_value=True)
+        except ArgumentError as e:
+            print('recache: {}'.format(e.message))
+            return
+        # TODO: implement this
+
+
     def do_ls(self, line):
         '''Show possible branches to go from current position'''
         try:
