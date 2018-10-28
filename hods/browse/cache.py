@@ -31,6 +31,9 @@ from hods import Metadata
 from hods._lib.core import is_mapping
 from hods._lib.files import get_files
 
+import logging
+log = logging.getLogger(__name__)
+
 
 SEPARATOR = '.'  # separates nested keys when flattening tree data
 
@@ -87,6 +90,7 @@ class DocumentsReadOnlyCache:
         in_memory = self.filename == ':memory:'
 
         if reinit and not in_memory and os.path.exists(self.filename):
+            log.debug('Deleting cache file: {}'.format(self.filename))
             os.remove(self.filename)
 
         if in_memory:
@@ -99,6 +103,7 @@ class DocumentsReadOnlyCache:
         self.sessionmaker = sessionmaker(bind=self.db)
 
         if reinit:
+            log.debug('Initializing empty database: {}'.format(self.filename))
             version_key, version_valid = self.SCHEMA_VERSION
             version = Info(option=version_key, value=version_valid)
             with self.session() as session:
@@ -129,17 +134,21 @@ class DocumentsReadOnlyCache:
                     (size, ctime, mtime) == (cached.size, cached.ctime, cached.mtime)
                 if cache_is_valid:
                     cached.seen = self.timestamp
+                    log.debug('Cache for {} is valid, skipping'.format(datafile))
                     continue
 
                 # Drop outdated caches, skip invalid documents
                 if cached is not None:
+                    log.debug('Dropping cached data for {}'.format(datafile))
                     session.delete(cached)
                 try:
                     content = Metadata(filename=datafile)
                 except Exception:
+                    log.debug('Error parsing {}, skipping'.format(datafile))
                     continue
 
                 # Add file description to cache
+                log.debug('Reading {} to cache'.format(datafile))
                 file_ = File()
                 file_.path  = datafile
                 file_.size, file_.ctime, file_.mtime = size, ctime, mtime
@@ -170,6 +179,7 @@ class DocumentsReadOnlyCache:
         '''Clear all outdated cache entries'''
         # Content entries are removed automatically thanks to SQLAlchemy
         # relationship(cascade=...) feature
+        log.debug('Dropping outdated cache entries')
         with self.session() as session:
             session.query(File).filter( \
                 (File.seen != self.timestamp) | (File.seen == None) \
