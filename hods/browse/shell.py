@@ -81,6 +81,16 @@ class DocumentBrowser(Cmd):
         # TODO: implement this
 
 
+    def do_query(self, line=''):
+        '''Append new query: AND/OR'''
+        try:
+            args = Args(line, no_value=True)
+        except ArgumentError as e:
+            print('query: {}'.format(e.message))
+            return
+        # TODO: implement appending new query
+
+
     def do_ls(self, line):
         '''Show possible branches to go from current position'''
         try:
