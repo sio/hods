@@ -40,16 +40,18 @@ class DocumentBrowser(Cmd):
 
         if last_is_leaf == [True, True]: # second-last item is also leaf
             field = 'path'
-            path = path[:-1]
+            path, value = path[:-1], path[-1].step
         elif last_is_leaf and last_is_leaf[-1] == True:  # only the last item is leaf
             field = 'value'
+            value = True
         else:
             field = 'key'
+            value = False
 
         results = self.cache.get(
             attrs    = [field, 'is_leaf'],
             steps    = (p.step for p in path),
-            by_value = last_is_leaf[-1] if last_is_leaf else False,
+            by_value = value,
         )
         return OrderedDict(results)
 

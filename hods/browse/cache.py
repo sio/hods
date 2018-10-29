@@ -214,8 +214,10 @@ class DocumentsReadOnlyCache:
             target = Content
         else:
             target = [getattr(Content, a) for a in attrs]
-        if not by_value:
+        if by_value == False:
             condition = (Content.prefix == prefix)
+        elif by_value != True:
+            condition = (Content.value == by_value)
         else:
             condition = (Content.fullkey == prefix)
         return Query(target).filter(condition).distinct()
