@@ -35,8 +35,10 @@ class DocumentBrowser(Cmd):
 
 
     @lru_cache(maxsize=128)
-    def _list_items(self, *path):
+    def _list_items(self, *path, field=None):
         last_is_leaf = [p.is_leaf for p in path[-2:]]
+
+        default_field = field
 
         if last_is_leaf == [True, True]: # second-last item is also leaf
             field = 'path'
@@ -47,6 +49,9 @@ class DocumentBrowser(Cmd):
         else:
             field = 'key'
             value = False
+
+        if default_field:
+            field = default_field
 
         results = self.cache.get(
             attrs    = [field, 'is_leaf'],
@@ -78,9 +83,10 @@ class DocumentBrowser(Cmd):
         try:
             Args(line, no_value=True)
         except ArgumentError as e:
-            print('recache: {}'.format(e.message))
+            print('files: {}'.format(e.message))
             return
-        # TODO: implement this
+        results = self._list_items(*self.path, field='path')
+        print('\n'.join(results))
 
 
     def do_query(self, line=''):
