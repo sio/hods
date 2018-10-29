@@ -156,7 +156,7 @@ class Metadata:
     #   - Parsing JSON on each initialization ensures that instances never
     #     unintentionally share the data object. It's simpler than to build a
     #     catch-all deepcopy
-    __EMPTY_JSON = '''
+    _EMPTY_JSON = '''
         {
             "info": {
                 "version": "https://hods.ml/schemas/metadata-v1.json",
@@ -180,7 +180,7 @@ class Metadata:
         else:
             self._file = None
 
-        empty = json.loads(self.__EMPTY_JSON, object_pairs_hook=OrderedDict)
+        empty = json.loads(self._EMPTY_JSON, object_pairs_hook=OrderedDict)
         try:
             data['info']['version']
             only_payload = False
@@ -192,7 +192,7 @@ class Metadata:
             data = empty
         elif data is None and filename is not None:
             data = get_object(filename, fileformat)
-        else:
+        elif data is None:
             data = empty
 
         schema = Schema(data['info']['version'])
@@ -272,11 +272,17 @@ class Metadata:
 
 
     def __repr__(self):
-        return '<{cls} object (schema={schema}, id={id})>'.format(
+        return '<{cls}(schema={schema!r}, id={id!r})>'.format(
             cls = self.__class__.__name__,
             schema = self.info.version,
             id = id(self),
         )
+
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            return self._data_container == other._data_container
+        else:
+            return NotImplemented
 
 
     def __getitem__(self, key):
@@ -293,19 +299,28 @@ class Metadata:
 class TranslatorWrapper:
     '''
     Helper class to simplify class composition and wrapping properties
-
-    THIS IS NOT NECESSARY. SIMPLY DEFINE REQUIRED METHODS AND PROPERTIES IN
-    AlbumMetadata
     '''
-    pass
+    # TODO: TranslatorWrapper is not actually used anywhere. Will be deleted eventually
+    _reserved = {'_wrap', '_base'}
+    _wrap = {}  # attribute translation rules
 
 
+    def __init__(self, base):
+        self._base = base
 
-class AlbumMetadata:
-    '''
-    Stable API for music album metadata
-    '''
-    pass
+
+    def __getattr__(self, attr):
+        if attr not in self._reserved and attr in self._wrap:
+            return getattr(self._base, self._wrap[attr])
+        else:
+            return super().__getattr__(attr)
+
+
+    def __setattr__(self, attr, value):
+        if attr not in self._reserved and attr in self._wrap:
+            setattr(self._base, self._wrap[attr], value)
+        else:
+            return super().__setattr__(attr, value)
 
 
 

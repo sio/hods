@@ -1,0 +1,38 @@
+{
+  "album": "Cool Album",
+  "artist": "Some Performer",
+  "year": "2010",
+  "image_url": "http://imagehost/img.jpeg",
+  "genre": "",
+  "comment": "",
+  "composer": "",
+  "orig_artist": "",
+  "cd": "",
+  "tracks": [
+    {
+      "number": 1,
+      "title": "Track01",
+      "artist": "Same Guy"
+    },
+    {
+      "number": "2",
+      "title": "Track01",
+      "artist": ""
+    },
+    {
+      "number": 3,
+      "title": "Track01",
+      "artist": ""
+    },
+    {
+      "number": 4,
+      "title": "Track01",
+      "artist": "Same Guy"
+    },
+    {
+      "number": 5,
+      "title": "Track01",
+      "artist": "Same Guy"
+    }
+  ]
+}

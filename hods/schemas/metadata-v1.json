@@ -2,6 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "metadata-v1.json",
   "title": "Generic Metadata Schema (version 1)",
+  "description": "Schema for HODS document (https://hods.ml)",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -11,6 +12,7 @@
   "patternProperties": {
     "info": {
       "type": "object",
+      "description": "Meta information about attached data",
       "additionalProperties": false,
       "required": [
         "version",
@@ -20,14 +22,17 @@
       "properties": {
         "version": {
           "type": "string",
+          "description": "Schema identifier for the whole HODS document (usually URL)",
           "pattern": "^(.+)$"
         },
         "schema": {
           "type": "object",
+          "description": "Key-value pairs of payload section names and corresponding schema URLs",
           "additionalProperties": false,
           "patternProperties": {
             "^.*$": {
               "type": "string",
+              "description": "Schema identifier for the corresponding payload section",
               "pattern": "^(.*)$"
             }
           },
@@ -37,6 +42,7 @@
         },
         "hashes": {
           "type": "object",
+          "description": "Hash sums for the corresponding payload sections",
           "additionalProperties": false,
           "required": [
             "data"
@@ -44,6 +50,7 @@
           "patternProperties": {
             "^.*$": {
               "type": "object",
+              "description": "Hash sums for the specific payload section",
               "additionalProperties": false,
               "required": [
                 "timestamp"
@@ -51,10 +58,12 @@
               "patternProperties": {
                 "timestamp": {
                   "type": "string",
+                  "description": "ISO-8601 datetime with timezone",
                   "pattern": "^(.*)$"
                 },
                 "^.*$": {
                   "type": "string",
+                  "description": "Key-value pairs of hash algorithm name and hash value",
                   "pattern": "^\\S+$"
                 }
               }
@@ -64,7 +73,8 @@
       }
     },
     "^.*$": {
-      "type": "object"
+      "type": "object",
+      "description": "Any number of named payload sections"
     }
   }
 }
