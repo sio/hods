@@ -20,6 +20,9 @@ setup(
         'ruamel.yaml',
         'setuptools',
     ],
+    extras_require={
+        'music': ['tinytag'],
+    },
     python_requires='>=3.3',
     zip_safe=True,
 )
