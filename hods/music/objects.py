@@ -102,7 +102,7 @@ class MusicAlbumInfo(Metadata):
             elif len(values) == 0:
                 value = ''
             elif len(values) > 1:
-                value = ', '.join(sorted(values))
+                value = ', '.join(values)
             setattr(self.data, field, value)
 
         # Detect album artist
@@ -123,5 +123,5 @@ class MusicAlbumInfo(Metadata):
                 track['artist'] = ''
 
         # Write the results
-        self.data.tracks = sorted(tracks_collected, key=lambda x: x['number'])
+        self.data.tracks = tracks_collected
         self.validate_hashes(write_updates=True)
