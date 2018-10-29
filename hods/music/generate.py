@@ -57,6 +57,6 @@ def main(*args):
         if recursive:
             parent, subdirs, files = next(os.walk(dirname))
             main(
-                *(os.path.join(parent, subdir) for subdir in subdirs),
-                flags.RECURSIVE
+                flags.RECURSIVE,
+                *(os.path.join(parent, subdir) for subdir in subdirs)
             )
