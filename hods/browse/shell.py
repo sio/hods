@@ -23,40 +23,43 @@ class DocumentBrowser(Cmd):
         '''Initialize document browser with a cache file'''
         super().__init__(*a, **ka)
         self.directory = browse_directory
-        self.path = list()  # sequence of PathItem tuples
+        self.stack = [[]] # collection of paths (and-joined)
         self.cache = DocumentsReadOnlyCache(cache_file)
         self.do_recache()
 
 
     @property
-    def path_items(self):
+    def path(self):
+        '''Current path (sequence of PathItem tuples)'''
+        return self.stack[-1]  # last one must be the newest, we rely on that in _list_items
+
+
+    def path_items(self, field=None):
         '''Content of the current branch'''
-        return self._list_items(*self.path)
+        paths_hashable = tuple(tuple(p) for p in self.stack)
+        return self._list_items(paths_hashable, field)
 
 
     @lru_cache(maxsize=128)
-    def _list_items(self, *path, field=None):
-        last_is_leaf = [p.is_leaf for p in path[-2:]]
+    def _list_items(self, paths, field=None):
+        batch = list()
+        for path in paths:
+            last_is_leaf = [p.is_leaf for p in path[-2:]]
+            if last_is_leaf == [True, True]: # second-last item is also leaf
+                auto_field = 'path'
+                path, value = path[:-1], path[-1].step
+            elif last_is_leaf and last_is_leaf[-1] == True:  # only the last item is leaf
+                auto_field = 'value'
+                value = True
+            else:
+                auto_field = 'key'
+                value = False
+            steps = (p.step for p in path)
+            batch.append((steps, value))
 
-        default_field = field
-
-        if last_is_leaf == [True, True]: # second-last item is also leaf
-            field = 'path'
-            path, value = path[:-1], path[-1].step
-        elif last_is_leaf and last_is_leaf[-1] == True:  # only the last item is leaf
-            field = 'value'
-            value = True
-        else:
-            field = 'key'
-            value = False
-
-        if default_field:
-            field = default_field
-
-        results = self.cache.get(
-            attrs    = [field, 'is_leaf'],
-            steps    = (p.step for p in path),
-            by_value = value,
+        results = self.cache.gets(
+            attrs = [field or auto_field, 'is_leaf'],  # depends only on the last path
+            filter_params = batch,
         )
         return OrderedDict(results)
 
@@ -85,18 +88,18 @@ class DocumentBrowser(Cmd):
         except ArgumentError as e:
             print('files: {}'.format(e.message))
             return
-        results = self._list_items(*self.path, field='path')
+        results = self.path_items(field='path')
         print('\n'.join(results))
 
 
-    def do_query(self, line=''):
-        '''Append new query: AND/OR'''
+    def do_and(self, line=''):
+        '''Append new AND query'''
         try:
             args = Args(line, no_value=True)
         except ArgumentError as e:
-            print('query: {}'.format(e.message))
+            print('and: {}'.format(e.message))
             return
-        # TODO: implement appending new query
+        self.stack.append(self.path[:])
 
 
     def do_ls(self, line):
@@ -106,7 +109,7 @@ class DocumentBrowser(Cmd):
         except ArgumentError as e:
             print('ls: {}'.format(e.message))
             return
-        print('\n'.join(self.path_items.keys()))
+        print('\n'.join(self.path_items().keys()))
 
 
     def do_cd(self, line):
@@ -116,11 +119,11 @@ class DocumentBrowser(Cmd):
         except ArgumentError as e:
             print('cd: {}'.format(e.message))
             return
-        if target in self.path_items:
+        if target in self.path_items():
             if [p.is_leaf for p in self.path[-2:]] == [True, True]:
                 print('cd: can not go any deeper')
             else:
-                self.path.append(PathItem(target, self.path_items[target]))
+                self.path.append(PathItem(target, self.path_items()[target]))
         elif target == '..':
             self.do_up()
         else:
@@ -147,7 +150,8 @@ class DocumentBrowser(Cmd):
         except ArgumentError as e:
             print('pwd: {}'.format(e.message))
             return
-        print('/' + '/'.join(p.step for p in self.path))
+        for path in self.stack:
+            print('/' + '/'.join(p.step for p in path))
 
 
     def do_debug(self, line=''):

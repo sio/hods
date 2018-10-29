@@ -16,6 +16,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
+    and_,
     create_engine,
 )
 from sqlalchemy.exc import OperationalError
@@ -200,27 +201,51 @@ class DocumentsReadOnlyCache:
             yield from query.with_session(session)
 
 
+    def gets(self, attrs, filter_params):
+        '''
+        Same as get(), but for multiple queries joined with AND clause
+        '''
+        if isinstance(attrs, str):
+            attrs = (attrs,)
+
+        def batch():  # make filter_params hashable
+            for steps, by_value in filter_params:
+                yield tuple(steps), by_value
+
+        query = self._make_query(tuple(attrs), batch_args=tuple(batch()))
+        with self.session() as session:
+            yield from query.with_session(session)
+
+
     @lru_cache(maxsize=64)
-    def _make_query(self, attrs=None, steps=None, by_value=False):
+    def _make_query(self, attrs=None, steps=None, by_value=False, batch_args=None):
         '''
         Build a database query to retrieve unique values corresponding to the
         sequence of hierarchy steps in the tree data structure
         '''
-        if not steps:
-            prefix = None
-        else:
-            prefix = SEPARATOR.join(steps)
+        if batch_args is not None and (steps is not None or by_value != False):
+            raise TypeError('either provide steps and by_value or pack them into batch_args, not both ways at once')
+        if batch_args is None:
+            batch_args = ((steps, by_value),)
         if not attrs:
             target = Content
         else:
             target = [getattr(Content, a) for a in attrs]
-        if by_value == False:
-            condition = (Content.prefix == prefix)
-        elif by_value != True:
-            condition = (Content.value == by_value)
-        else:
-            condition = (Content.fullkey == prefix)
-        return Query(target).filter(condition).distinct()
+        conditions = list()
+        for steps, by_value in batch_args:
+            if not steps:
+                prefix = None
+            else:
+                prefix = SEPARATOR.join(steps)
+            if by_value == False:
+                condition = (Content.prefix == prefix)
+            elif by_value != True:
+                condition = (Content.value == by_value)
+            else:
+                condition = (Content.fullkey == prefix)
+            conditions.append(condition)
+        return Query(target).filter(and_(*conditions)).distinct()
+        # TODO: and is incorrect! need more clever filter combination
 
 
 TreeRow = namedtuple('TreeRow', 'fullkey,prefix,key,value,leafnode')
