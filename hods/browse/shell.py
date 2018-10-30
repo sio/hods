@@ -3,10 +3,12 @@ Interactive shell for browsing HODS documents
 '''
 
 
+import re
 import shlex
 from cmd import Cmd
 from collections import namedtuple, OrderedDict
 from functools import lru_cache
+from itertools import islice
 
 from hods.browse.cache import DocumentsReadOnlyCache
 
@@ -61,7 +63,7 @@ class DocumentBrowser(Cmd):
             attrs = [field or auto_field, 'is_leaf'],  # depends only on the last path
             filter_params = batch,
         )
-        return OrderedDict(results)
+        return OrderedDict(sorted(results))
 
 
     def emptyline(self):
@@ -115,10 +117,14 @@ class DocumentBrowser(Cmd):
     def do_cd(self, line):
         '''Go one level deeper into data hierarchy'''
         try:
-            target = Args(line, single_value=True).argv[0]
+            args = Args(line, single_value=True)
         except ArgumentError as e:
             print('cd: {}'.format(e.message))
             return
+
+        args.positional_from(self.path_items())
+        target = args[0]
+
         if target in self.path_items():
             if [p.is_leaf for p in self.path[-2:]] == [True, True]:
                 print('cd: can not go any deeper')
@@ -184,6 +190,8 @@ class Args:
     Handle command line arguments in interactive shell
     '''
 
+    POSITIONAL = re.compile(r'^\$([0-9+])$')
+
 
     def __init__(self, line, single_value=False, no_value=False):
         '''Parse argument string'''
@@ -197,3 +205,20 @@ class Args:
             raise ArgumentError('expected no arguments, but got: {}'.format(
                 self.raw
             ))
+
+
+    def __getitem__(self, index):
+        return self.argv[index]
+
+
+    def positional_from(self, sequence):
+        '''Replace positional references with sequence values'''
+        for arg in sorted(self.argv):
+            match = self.POSITIONAL.match(arg)
+            if match:
+                position = int(match.groups()[0])
+                index = self.argv.index(arg)
+                try:
+                    self.argv[index] = next(islice(sequence, position-1, position))
+                except StopIteration:
+                    pass
