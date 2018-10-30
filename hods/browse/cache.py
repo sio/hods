@@ -227,11 +227,13 @@ class DocumentsReadOnlyCache:
             raise TypeError('either provide steps and by_value or pack them into batch_args, not both ways at once')
         if batch_args is None:
             batch_args = ((steps, by_value),)
+
         if not attrs:
             target = Content
         else:
             target = [getattr(Content, a) for a in attrs]
-        conditions = list()
+
+        subqueries = list()
         for steps, by_value in batch_args:
             if not steps:
                 prefix = None
@@ -243,9 +245,13 @@ class DocumentsReadOnlyCache:
                 condition = (Content.value == by_value)
             else:
                 condition = (Content.fullkey == prefix)
-            conditions.append(condition)
-        return Query(target).filter(and_(*conditions)).distinct()
-        # TODO: and is incorrect! need more clever filter combination
+            subqueries.append(
+                Content.path.in_(
+                    Query(Content.path).filter(condition).subquery()
+                )
+            )
+        # Last condition determines how we filter target fields
+        return Query(target).filter(and_(condition, *subqueries)).distinct()
 
 
 TreeRow = namedtuple('TreeRow', 'fullkey,prefix,key,value,leafnode')
