@@ -9,6 +9,7 @@ from cmd import Cmd
 from collections import namedtuple, OrderedDict
 from functools import lru_cache
 from itertools import islice
+from math import log10
 
 from hods.browse.cache import DocumentsReadOnlyCache
 
@@ -89,17 +90,6 @@ class DocumentBrowser(Cmd):
         self.cache.drop_outdated()
 
 
-    def do_files(self, line=''):
-        '''Show files that match the current query'''
-        try:
-            Args(line, no_value=True)
-        except ArgumentError as e:
-            print('files: {}'.format(e.message))
-            return
-        results = self.get_pathitems(field='path')
-        print('\n'.join(results))
-
-
     def do_and(self, line=''):
         '''Append new AND query'''
         try:
@@ -110,14 +100,23 @@ class DocumentBrowser(Cmd):
         self.stack.append(self.path[:])
 
 
-    def do_ls(self, line):
+    def do_ls(self, line, field=None):
         '''Show possible branches to go from current position'''
         try:
             args = Args(line, no_value=True)
         except ArgumentError as e:
             print('ls: {}'.format(e.message))
             return
-        print('\n'.join(self.path_items.keys()))
+        items = self.get_pathitems(field)
+        width = int(log10(len(items))) + 1
+        template = '{num:>%s}: {item}' % width
+        for num, item in enumerate(items, 1):
+            print(template.format(**locals()))
+
+
+    def do_files(self, line=''):
+        '''Show files that match the current query'''
+        self.do_ls(line, field='path')
 
 
     def do_cd(self, line):
