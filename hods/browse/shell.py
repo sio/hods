@@ -36,7 +36,13 @@ class DocumentBrowser(Cmd):
         return self.stack[-1]  # last one must be the newest, we rely on that in _list_items
 
 
-    def path_items(self, field=None):
+    @property
+    def path_items(self):
+        '''Content of the current branch'''
+        return self.get_pathitems()
+
+
+    def get_pathitems(self, field=None):
         '''Content of the current branch'''
         paths_hashable = tuple(tuple(p) for p in self.stack)
         return self._list_items(paths_hashable, field)
@@ -90,7 +96,7 @@ class DocumentBrowser(Cmd):
         except ArgumentError as e:
             print('files: {}'.format(e.message))
             return
-        results = self.path_items(field='path')
+        results = self.get_pathitems(field='path')
         print('\n'.join(results))
 
 
@@ -111,7 +117,7 @@ class DocumentBrowser(Cmd):
         except ArgumentError as e:
             print('ls: {}'.format(e.message))
             return
-        print('\n'.join(self.path_items().keys()))
+        print('\n'.join(self.path_items.keys()))
 
 
     def do_cd(self, line):
@@ -122,14 +128,14 @@ class DocumentBrowser(Cmd):
             print('cd: {}'.format(e.message))
             return
 
-        args.positional_from(self.path_items())
+        args.positional_from(self.path_items)
         target = args[0]
 
-        if target in self.path_items():
+        if target in self.path_items:
             if [p.is_leaf for p in self.path[-2:]] == [True, True]:
                 print('cd: can not go any deeper')
             else:
-                self.path.append(PathItem(target, self.path_items()[target]))
+                self.path.append(PathItem(target, self.path_items[target]))
         elif target == '..':
             self.do_up()
         else:
