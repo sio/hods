@@ -4,3 +4,4 @@ strictyaml
 ruamel.yaml
 setuptools
 sqlalchemy
+appdirs

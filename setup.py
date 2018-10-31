@@ -19,6 +19,7 @@ setup(
         'strictyaml',
         'ruamel.yaml',
         'setuptools',
+        'appdirs',
     ],
     python_requires='>=3.3',
     zip_safe=True,
