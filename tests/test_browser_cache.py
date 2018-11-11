@@ -19,9 +19,9 @@ class testCacheORM(TestCase):
         cache = self.cache
         with cache.session() as session:
             f = File(path='hello')
-            c = Content(path='hello', fullkey='1')
-            c1 = Content(path='hello world', fullkey='2')
             session.add(f)
+            c = Content(file=f, fullkey='1')
+            c1 = Content(file_id=999, fullkey='2')
             session.add(c)
             session.add(c1)
         with cache.session() as s:
@@ -46,12 +46,13 @@ class testCacheORM(TestCase):
         cache = self.cache
         cache.add('tests/data/samples/sample-v1-02.json')
         cache.add('tests/data/samples/sample-v1-03-remote_schema.json')
-        top = list(cache.get('key'))
-        tuples = list(cache.get('key,is_leaf'.split(',')))
-        files = list(cache.get('path'))
+        top = list(cache.gets('key'))
+        tuples = list(cache.gets('key,is_leaf'.split(',')))
+        files = list(cache.gets('path'))
         self.assertEqual(len(files), 2)
         self.assertEqual(len(top), 3) # info, data, extra
 
+    @skip
     def test_browser(self):
         shell = DocumentBrowser(':memory:', 'tests/data/samples')
         #import pdb; pdb.set_trace()

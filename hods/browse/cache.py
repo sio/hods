@@ -20,7 +20,10 @@ from sqlalchemy import (
     create_engine,
 )
 from sqlalchemy.exc import OperationalError
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.declarative import (
+    declarative_base,
+)
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import (
     Query,
     relationship,
@@ -155,11 +158,12 @@ class DocumentsReadOnlyCache:
                 file_.size, file_.ctime, file_.mtime = size, ctime, mtime
                 file_.seen  = self.timestamp
                 session.add(file_)
+                session.commit()  # save changes, assign ID to file_
 
                 # Add file contents to cache
                 for row in walk_tree(content):
                     record = Content(
-                        path    = datafile,
+                        file_id = file_.id,
                         fullkey = row.fullkey,
                         prefix  = row.prefix,
                         key     = row.key,
@@ -201,20 +205,43 @@ class DocumentsReadOnlyCache:
             yield from query.with_session(session)
 
 
-    def gets(self, attrs, filter_params):
+    def gets(self, attrs, filter_params=None):
         '''
         Same as get(), but for multiple queries joined with AND clause
         '''
         if isinstance(attrs, str):
             attrs = (attrs,)
+        if filter_params is None:
+            filter_params = (((), False),)
 
         def batch():  # make filter_params hashable
             for steps, by_value in filter_params:
                 yield tuple(steps), by_value
 
-        query = self._make_query(tuple(attrs), batch_args=tuple(batch()))
+        internal_attrs = list()
+        path_positions = list()
+        for position, attr in enumerate(attrs):
+            if attr == 'path':
+                internal_attrs.append('file_id')
+                path_positions.append(position)
+            else:
+                internal_attrs.append(attr)
+
+        query = self._make_query(tuple(internal_attrs), batch_args=tuple(batch()))
         with self.session() as session:
-            yield from query.with_session(session)
+            for result in query.with_session(session):
+                if path_positions:
+                    query = session.query(File)
+                    paths = {x: query.get(result[x]).path for x in path_positions}
+                    modified_result = list()
+                    for num, item in enumerate(result):
+                        if num in path_positions:
+                            modified_result.append(paths[num])
+                        else:
+                            modified_result.append(item)
+                    yield tuple(modified_result)
+                else:
+                    yield result
 
 
     @lru_cache(maxsize=64)
@@ -246,8 +273,8 @@ class DocumentsReadOnlyCache:
             else:
                 condition = (Content.fullkey == prefix)
             subqueries.append(
-                Content.path.in_(
-                    Query(Content.path).filter(condition).subquery()
+                Content.file_id.in_(
+                    Query(Content.file_id).filter(condition).subquery()
                 )
             )
         # Last condition determines how we filter target fields
@@ -286,7 +313,8 @@ class File(Base):
     '''List of files added to cache'''
     __tablename__ = 'files'
 
-    path  = Column(String, primary_key=True)
+    id    = Column(Integer, primary_key=True, autoincrement=True)
+    path  = Column(String, unique=True, nullable=False)
     size  = Column(Integer)
     mtime = Column(Integer)
     ctime = Column(Integer)
@@ -305,9 +333,9 @@ class Content(Base):
     '''Full contents for all files added to cache'''
     __tablename__ = 'content'
 
-    path    = Column(
-                 String,
-                 ForeignKey('files.path', ondelete='CASCADE', onupdate='CASCADE'),
+    file_id = Column(
+                 Integer,
+                 ForeignKey('files.id', ondelete='CASCADE', onupdate='CASCADE'),
                  primary_key=True
               )
     fullkey = Column(String, primary_key=True)
@@ -315,9 +343,12 @@ class Content(Base):
     key     = Column(String)
     value   = Column(String)
     is_leaf = Column(Boolean)
-    seen    = Column(Integer)
 
     file    = relationship('File', back_populates='content')
+
+    @hybrid_property
+    def path(self):
+        return self.file.path
 
 
 
