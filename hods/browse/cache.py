@@ -158,12 +158,11 @@ class DocumentsReadOnlyCache:
                 file_.size, file_.ctime, file_.mtime = size, ctime, mtime
                 file_.seen  = self.timestamp
                 session.add(file_)
-                session.commit()  # save changes, assign ID to file_
 
                 # Add file contents to cache
                 for row in walk_tree(content):
                     record = Content(
-                        file_id = file_.id,
+                        file    = file_,
                         fullkey = row.fullkey,
                         prefix  = row.prefix,
                         key     = row.key,
