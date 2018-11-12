@@ -108,7 +108,7 @@ class DocumentBrowser(Cmd):
             print('ls: {}'.format(e.message))
             return
         items = self.get_pathitems(field)
-        width = int(log10(len(items))) + 1
+        width = int(log10(len(items))) + 1 if items else 0
         template = '{num:>%s}: {item}' % width
         for num, item in enumerate(items, 1):
             print(template.format(**locals()))
