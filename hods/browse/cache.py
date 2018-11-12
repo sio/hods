@@ -6,6 +6,7 @@ Sqlite-backed cache for multiple HODS documents
 import os
 import time
 from collections import namedtuple
+from concurrent.futures import as_completed, ProcessPoolExecutor
 from contextlib import contextmanager
 from functools import lru_cache
 
@@ -125,8 +126,10 @@ class DocumentsReadOnlyCache:
         else:
             files = []
 
-        for datafile in files:
-            with self.session() as session:
+        concurrent = ProcessPoolExecutor()
+        tasks = list()
+        with self.session() as session:
+            for datafile in files:
                 datafile = os.path.abspath(datafile)
 
                 # Check if file is already in cache and that cache is valid
@@ -145,31 +148,19 @@ class DocumentsReadOnlyCache:
                 if cached is not None:
                     log.debug('Dropping cached data for {}'.format(datafile))
                     session.delete(cached)
-                try:
-                    content = Metadata(filename=datafile)
-                except Exception:
-                    log.debug('Error parsing {}, skipping'.format(datafile))
-                    continue
 
-                # Add file description to cache
-                log.debug('Reading {} to cache'.format(datafile))
-                file_ = File()
-                file_.path  = datafile
-                file_.size, file_.ctime, file_.mtime = size, ctime, mtime
-                file_.seen  = self.timestamp
-                session.add(file_)
+                # Schedule reading and parsing the file
+                tasks.append(concurrent.submit(
+                    parse_file,
+                    datafile,
+                    (size, ctime, mtime),
+                    self.timestamp,
+                ))
 
-                # Add file contents to cache
-                for row in walk_tree(content):
-                    record = Content(
-                        file    = file_,
-                        fullkey = row.fullkey,
-                        prefix  = row.prefix,
-                        key     = row.key,
-                        value   = row.value,
-                        is_leaf = row.leafnode,
-                    )
-                    session.add(record)
+        # Actually write cache to database (single thread)
+        with self.session() as session:
+            for task in as_completed(tasks):
+                session.add_all(task.result())
 
 
     def drop(self, filename):
@@ -278,6 +269,46 @@ class DocumentsReadOnlyCache:
             )
         # Last condition determines how we filter target fields
         return Query(target).filter(and_(condition, *subqueries)).distinct()
+
+
+def parse_file(datafile, stat, timestamp):
+    '''
+    Prepare a single file for writing into cache db. This is a worker for
+    concurrent execution (multiprocessing).
+
+    Returns a list of related SQLAlchemy objects ready for writing into
+    database
+    '''
+    try:
+        content = Metadata(filename=datafile)
+    except Exception:
+        log.debug('Error parsing {}, skipping'.format(datafile))
+        return []
+
+    # Add file description to cache
+    log.debug('Reading {} to cache'.format(datafile))
+    results = list()
+    size, ctime, mtime = stat
+    document = File(
+        path = datafile,
+        size = size,
+        ctime = ctime,
+        mtime = mtime,
+        seen = timestamp,
+    )
+    results.append(document)
+
+    # Add file contents to cache
+    for row in walk_tree(content):
+        results.append(Content(
+            file    = document,
+            fullkey = row.fullkey,
+            prefix  = row.prefix,
+            key     = row.key,
+            value   = row.value,
+            is_leaf = row.leafnode,
+        ))
+    return results
 
 
 TreeRow = namedtuple('TreeRow', 'fullkey,prefix,key,value,leafnode')
