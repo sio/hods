@@ -40,6 +40,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
+BUFFER_SIZE = 100  # how many files are parsed into memory before flushing to db
 SEPARATOR = '.'  # separates nested keys when flattening tree data
 
 
@@ -159,8 +160,13 @@ class DocumentsReadOnlyCache:
 
         # Actually write cache to database (single thread)
         with self.session() as session:
+            batch_size = 0
             for task in as_completed(tasks):
                 session.add_all(task.result())
+                batch_size += 1
+                if batch_size >= BUFFER_SIZE:
+                    session.commit()
+                    batch_size = 0
 
 
     def drop(self, filename):
