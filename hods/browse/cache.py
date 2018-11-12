@@ -157,8 +157,9 @@ class DocumentsReadOnlyCache:
                     self.timestamp,
                 ))
 
-        for task in as_completed(tasks):
-            with self.session() as session:
+        # Actually write cache to database (single thread)
+        with self.session() as session:
+            for task in as_completed(tasks):
                 session.add_all(task.result())
 
 
@@ -286,17 +287,21 @@ def parse_file(datafile, stat, timestamp):
 
     # Add file description to cache
     log.debug('Reading {} to cache'.format(datafile))
-    file_ = File()
-    file_.path  = datafile
-    file_.size, file_.ctime, file_.mtime = stat
-    file_.seen  = timestamp
+    results = list()
+    size, ctime, mtime = stat
+    document = File(
+        path = datafile,
+        size = size,
+        ctime = ctime,
+        mtime = mtime,
+        seen = timestamp,
+    )
+    results.append(document)
 
     # Add file contents to cache
-    results = list()
-    results.append(file_)
     for row in walk_tree(content):
         results.append(Content(
-            file    = file_,
+            file    = document,
             fullkey = row.fullkey,
             prefix  = row.prefix,
             key     = row.key,
