@@ -21,6 +21,8 @@ class DocumentBrowser(Cmd):
     intro = 'Interactive document browser for HODS (https://hods.ml)'
     prompt = '(hods) > '
 
+    PATH_SEPARATOR = '/'  # separates query path elements inside this shell
+
 
     def __init__(self, cache_file, browse_directory, *a, **ka):
         '''Initialize document browser with a cache file'''
@@ -120,7 +122,7 @@ class DocumentBrowser(Cmd):
 
 
     def do_cd(self, line):
-        '''Go one level deeper into data hierarchy'''
+        '''Change current working directory'''
         try:
             args = Args(line, single_value=True)
         except ArgumentError as e:
@@ -128,17 +130,40 @@ class DocumentBrowser(Cmd):
             return
 
         args.positional_from(self.path_items)
-        target = args[0]
+        elements = args[0].split(self.PATH_SEPARATOR)
 
+        fallback = self.path[:]
+        try:
+            self._change_dir(elements, absolute=args[0].startswith(self.PATH_SEPARATOR))
+        except InvalidPathError as e:
+            print('cd: {}'.format(e.args[0]))
+            path_collection = self.path
+            path_collection.clear()
+            path_collection += fallback
+
+
+    def _change_dir(self, elements, absolute=False):
+        '''Change current working directory. Internal logic'''
+        if absolute:
+            self.path.clear()
+
+        if len(elements) > 1:
+            self._change_dir(elements[:1])
+            self._change_dir(elements[1:])
+            return
+
+        target = elements[0]
         if target in self.path_items:
             if [p.is_leaf for p in self.path[-2:]] == [True, True]:
-                print('cd: can not go any deeper')
+                raise InvalidPathError('can not go any deeper: {!r}'.format(target))
             else:
                 self.path.append(PathItem(target, self.path_items[target]))
         elif target == '..':
             self.do_up()
+        elif target == '':
+            pass
         else:
-            print('cd: can not browse {!r}'.format(target))
+            raise InvalidPathError('can not browse {!r}'.format(target))
 
 
     def do_up(self, line=''):
@@ -176,6 +201,11 @@ class DocumentBrowser(Cmd):
 
 
     do_EOF = do_exit
+
+
+
+class InvalidPathError(ValueError):
+    '''Raised when a command encounters invalid query path'''
 
 
 
