@@ -129,9 +129,7 @@ class DocumentBrowser(Cmd):
             print('cd: {}'.format(e.message))
             return
 
-        args.positional_from(self.path_items)
         elements = args[0].split(self.PATH_SEPARATOR)
-
         fallback = self.path[:]
         try:
             self._change_dir(elements, absolute=args[0].startswith(self.PATH_SEPARATOR))
@@ -152,7 +150,7 @@ class DocumentBrowser(Cmd):
             self._change_dir(elements[1:])
             return
 
-        target = elements[0]
+        target = parse_positional(elements[0], self.path_items)
         if target in self.path_items:
             if [p.is_leaf for p in self.path[-2:]] == [True, True]:
                 raise InvalidPathError('can not go any deeper: {!r}'.format(target))
@@ -225,9 +223,6 @@ class Args:
     Handle command line arguments in interactive shell
     '''
 
-    POSITIONAL = re.compile(r'^\$([0-9+])$')
-
-
     def __init__(self, line, single_value=False, no_value=False):
         '''Parse argument string'''
         self.raw = line
@@ -246,14 +241,14 @@ class Args:
         return self.argv[index]
 
 
-    def positional_from(self, sequence):
-        '''Replace positional references with sequence values'''
-        for arg in sorted(self.argv):
-            match = self.POSITIONAL.match(arg)
-            if match:
-                position = int(match.groups()[0])
-                index = self.argv.index(arg)
-                try:
-                    self.argv[index] = next(islice(sequence, position-1, position))
-                except StopIteration:
-                    pass
+POSITIONAL = re.compile(r'^\$([0-9]+)$')
+def parse_positional(value, sequence):
+    '''Replace positional references with sequence values'''
+    match = POSITIONAL.match(value)
+    if match:
+        position = int(match.groups()[0])
+        try:
+            value = next(islice(sequence, position-1, position))
+        except StopIteration:
+            pass
+    return value
