@@ -12,7 +12,7 @@ if sys.argv[0].endswith('__main__.py'):
     # (it's just a hint anyway)
     # (if you have spaces in your executable you get what you deserve!)
     executable = os.path.basename(sys.executable)
-    sys.argv[0] = executable + ' -m ' + __package__
+    sys.argv[0] = '{} -m {}'.format(executable, __package__)
     del os
 
 
